@@ -1,0 +1,63 @@
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+*~
+*.iml
+.vscode/
+
+# JetBrains (keep shared project configs for IDEA/Android Studio debugging)
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/caches
+.idea/**/libraries
+.idea/**/assetWizardSettings.xml
+.idea/**/deviceManager.xml
+.idea/**/gradle.xml
+
+# Logs / temp
+*.log
+*.tmp
+*.temp
+
+# Dart / Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+.pub-cache/
+build/
+coverage/
+**/doc/api/
+app.*.symbols
+app.*.map.json
+
+# Flutter generated (do not commit)
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+ios/Flutter/.last_build_id
+
+# iOS / Xcode
+ios/Pods/
+ios/.symlinks/
+ios/DerivedData/
+**/*.xcuserstate
+**/*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# macOS / Linux / Windows generated
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
