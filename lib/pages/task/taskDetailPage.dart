@@ -49,6 +49,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   int? _taskId;
   int? _repeatRuleId;
+  int? _manualOrder;
 
   String _title = '';
   String _description = '';
@@ -89,6 +90,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
     _taskId = task.id;
     _repeatRuleId = task.repeatRuleId;
+    _manualOrder = task.manualOrder;
     _title = task.title;
     _description = task.description ?? '';
     _taskBookId = task.taskBookId;
@@ -532,6 +534,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       notifyBeforeEndMinutes: _notifyBeforeEndMinutes,
       widgetDisplayScopes: _widgetDisplayScopes.join(','),
       widgetInfoType: _widgetInfoType,
+      manualOrder: _manualOrder,
       createdAt: widget.task?.createdAt ?? now,
       updatedAt: now,
     );
