@@ -1,9 +1,17 @@
-name: Flutter CI
+name: Flutter CI/CD
 
 on:
   push:
-    branches: [ release ]
-  pull_request:
+    tags:
+      - 'v*'             # tag 触发
+    branches:
+      - 'release'        # release 分支触发
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build (ios/android/all)'
+        required: false
+        default: 'all'
 
 jobs:
   build:
@@ -16,8 +24,7 @@ jobs:
       - name: 🛠 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.5'   # 根据你项目版本改
-          
+          flutter-version: '3.41.5'
 
       - name: 📦 Cache Flutter
         uses: actions/cache@v3
@@ -27,86 +34,106 @@ jobs:
             build
           key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.lock') }}
 
+      - name: 📦 Cache CocoaPods
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cocoapods
+            ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+
       - name: 📦 Install dependencies
         run: flutter pub get
 
-      - name: 🔍 Flutter doctor
-        run: flutter doctor -v
-
-      # 👇 关键：预缓存 iOS（避免 Flutter.framework 缺失）
       - name: 📲 Precache iOS
         run: flutter precache --ios
 
-      # 👇 关键：清理避免你刚才那个崩溃问题
       - name: 🧹 Clean build
         run: flutter clean
 
       - name: 🔄 Reinstall packages
         run: flutter pub get
 
-      # -----------------------
-      # 🍎 iOS 构建
-      # -----------------------
-      - name: 📦 Install CocoaPods
+      - name: 🏷 Determine Platform
+        id: platform
         run: |
-          cd ios
-          pod install
+          PLATFORM="${{ github.event.inputs.platform }}"
+          if [ -z "$PLATFORM" ]; then
+            PLATFORM="all"
+          fi
+          echo "platform=$PLATFORM" >> $GITHUB_ENV
+          echo "Using platform: $PLATFORM"
 
-      - name: 🏗 Build iOS (no codesign)
-        run: flutter build ios --no-codesign
-
-      # -----------------------
-      # 🤖 Android 构建
-      # -----------------------
+      # Android Build
       - name: 🤖 Build APK
+        if: ${{ env.platform == 'android' || env.platform == 'all' }}
         run: flutter build apk --release
 
       - name: 🤖 Build AAB
+        if: ${{ env.platform == 'android' || env.platform == 'all' }}
         run: flutter build appbundle
 
+      # iOS Build
+      - name: 📦 Install CocoaPods
+        if: ${{ env.platform == 'ios' || env.platform == 'all' }}
+        run: |
+          cd ios
+          pod install --repo-update
 
-      # 👇 新增：打包 IPA
+      - name: 🏗 Build iOS
+        if: ${{ env.platform == 'ios' || env.platform == 'all' }}
+        run: flutter build ios --release --no-codesign
+
       - name: 📦 Package IPA
+        if: ${{ env.platform == 'ios' || env.platform == 'all' }}
         run: |
           mkdir -p build/ios/ipa/Payload
           cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
           cd build/ios/ipa
           zip -r app.ipa Payload
 
-      # 👇 上传 IPA
+      # Upload Artifacts
       - name: 📤 Upload IPA
+        if: ${{ env.platform == 'ios' || env.platform == 'all' }}
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
           path: build/ios/ipa/app.ipa
 
-      # -----------------------
-      # 📤 上传产物
-      # -----------------------
       - name: 📤 Upload APK
+        if: ${{ env.platform == 'android' || env.platform == 'all' }}
         uses: actions/upload-artifact@v4
         with:
           name: app-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: 📤 Upload AAB
+        if: ${{ env.platform == 'android' || env.platform == 'all' }}
         uses: actions/upload-artifact@v4
         with:
           name: app-aab
           path: build/app/outputs/bundle/release/app-release.aab
 
-      - name: 📤 Upload iOS build
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-build
-          path: build/ios/iphoneos
-      # Release
+      # GitHub Release
       - name: 📦 Upload to Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
-            build/ios/iphoneos/*.ipa
+            build/ios/ipa/app.ipa
+          draft: false
+          prerelease: false
+          latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generate Changelog (recent 10 commits)
+      - name: 📝 Generate Changelog
+        if: always()
+        run: |
+          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+          git log -10 --pretty=format:"- %s" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
