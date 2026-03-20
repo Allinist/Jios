@@ -89,9 +89,9 @@ jobs:
         if: ${{ env.platform == 'android' || env.platform == 'all' }}
         run: flutter build apk --release
 
-      - name: 🤖 Build AAB
-        if: ${{ env.platform == 'android' || env.platform == 'all' }}
-        run: flutter build appbundle
+    #   - name: 🤖 Build AAB
+    #     if: ${{ env.platform == 'android' || env.platform == 'all' }}
+    #     run: flutter build appbundle
 
       # -----------------------
       # iOS Build
@@ -131,12 +131,12 @@ jobs:
           name: app-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: 📤 Upload AAB
-        if: ${{ env.platform == 'android' || env.platform == 'all' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-aab
-          path: build/app/outputs/bundle/release/app-release.aab
+    #   - name: 📤 Upload AAB
+    #     if: ${{ env.platform == 'android' || env.platform == 'all' }}
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: app-aab
+    #       path: build/app/outputs/bundle/release/app-release.aab
 
       # -----------------------
       # GitHub Release
@@ -148,8 +148,8 @@ jobs:
           name: Release ${{ github.ref_name }}
           files: |
             build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
             build/ios/ipa/app.ipa
+        # build/app/outputs/bundle/release/app-release.aab
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

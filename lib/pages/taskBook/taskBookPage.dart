@@ -89,6 +89,18 @@ class _TaskBookPageState extends State<TaskBookPage> {
   }
 
   int _taskComparator(Task a, Task b) {
+    final aOrder = a.manualOrder;
+    final bOrder = b.manualOrder;
+    if (aOrder != null && bOrder != null && aOrder != bOrder) {
+      return aOrder.compareTo(bOrder);
+    }
+    if (aOrder != null && bOrder == null) {
+      return -1;
+    }
+    if (aOrder == null && bOrder != null) {
+      return 1;
+    }
+
     final aCompleted = a.status == 'completed';
     final bCompleted = b.status == 'completed';
 
@@ -106,6 +118,136 @@ class _TaskBookPageState extends State<TaskBookPage> {
     return a.createdAt.compareTo(b.createdAt);
   }
 
+  Future<void> _openSortDialog({
+    required String title,
+    required List<Task> source,
+  }) async {
+    if (source.length < 2) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('至少需要两个任务才能排序')),
+      );
+      return;
+    }
+
+    final items = List<Task>.from(source);
+
+    final save = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.75,
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: Text('$title 排序'),
+                      subtitle: const Text('拖拽右侧手柄调整顺序'),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: ReorderableListView.builder(
+                        itemCount: items.length,
+                        buildDefaultDragHandles: false,
+                        itemBuilder: (context, index) {
+                          final task = items[index];
+                          return ListTile(
+                            key: ValueKey(task.id ?? task.createdAt),
+                            title: Text(task.title),
+                            subtitle: task.description == null || task.description!.isEmpty
+                                ? null
+                                : Text(
+                                    task.description!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                            trailing: ReorderableDragStartListener(
+                              index: index,
+                              child: const Icon(Icons.drag_handle),
+                            ),
+                          );
+                        },
+                        onReorder: (oldIndex, newIndex) {
+                          setSheetState(() {
+                            if (newIndex > oldIndex) {
+                              newIndex -= 1;
+                            }
+                            final task = items.removeAt(oldIndex);
+                            items.insert(newIndex, task);
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('取消'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('保存顺序'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (save != true) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    for (int i = 0; i < items.length; i++) {
+      final task = items[i];
+      final updated = Task(
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        taskBookId: task.taskBookId,
+        taskType: task.taskType,
+        priority: task.priority,
+        status: task.status,
+        startDate: task.startDate,
+        endDate: task.endDate,
+        expectedDuration: task.expectedDuration,
+        repeatRuleId: task.repeatRuleId,
+        createdAt: task.createdAt,
+        updatedAt: now,
+        color: task.color,
+        timelineDisplayMask: task.timelineDisplayMask,
+        timelineGranularity: task.timelineGranularity,
+        notifyAtStart: task.notifyAtStart,
+        notifyBeforeStartMinutes: task.notifyBeforeStartMinutes,
+        notifyAtEnd: task.notifyAtEnd,
+        notifyBeforeEndMinutes: task.notifyBeforeEndMinutes,
+        widgetDisplayScopes: task.widgetDisplayScopes,
+        widgetInfoType: task.widgetInfoType,
+        manualOrder: i,
+      );
+      await _taskDao.update(updated);
+    }
+
+    await WidgetService.syncWidgetData();
+    await WidgetService.refreshWidget();
+    await _loadData();
+  }
+
   Future<void> _openBookEditor({TaskBook? book}) async {
     final changed = await Navigator.push<bool>(
       context,
@@ -121,6 +263,21 @@ class _TaskBookPageState extends State<TaskBookPage> {
     final changed = await Navigator.push<bool>(
       context,
       MaterialPageRoute(builder: (_) => TaskDetailPage(task: task)),
+    );
+
+    if (changed == true) {
+      await WidgetService.syncWidgetData();
+      await WidgetService.refreshWidget();
+      await _loadData();
+    }
+  }
+
+  Future<void> _createTaskForBook(int? taskBookId) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TaskDetailPage.create(initialTaskBookId: taskBookId),
+      ),
     );
 
     if (changed == true) {
@@ -169,6 +326,11 @@ class _TaskBookPageState extends State<TaskBookPage> {
                     ? null
                     : Text(book.description!),
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.add_task),
+                    title: const Text('新增任务'),
+                    onTap: () => _createTaskForBook(book.id),
+                  ),
                   ..._buildTaskTiles(_tasksByBookId[book.id] ?? []),
                 ],
               ),
@@ -178,6 +340,11 @@ class _TaskBookPageState extends State<TaskBookPage> {
                 initiallyExpanded: true,
                 title: const Text('未归类任务'),
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.add_task),
+                    title: const Text('新增任务'),
+                    onTap: () => _createTaskForBook(null),
+                  ),
                   ..._buildTaskTiles(_unassignedTasks),
                 ],
               ),
@@ -238,6 +405,7 @@ class _TaskBookPageState extends State<TaskBookPage> {
                 notifyBeforeEndMinutes: task.notifyBeforeEndMinutes,
                 widgetDisplayScopes: task.widgetDisplayScopes,
                 widgetInfoType: task.widgetInfoType,
+                manualOrder: task.manualOrder,
               );
 
               await _taskDao.update(updated);
@@ -247,6 +415,13 @@ class _TaskBookPageState extends State<TaskBookPage> {
               await _loadData();
             },
             onTap: () => _openTaskDetail(task),
+            onLongPress: () {
+              final title = task.taskBookId == null ? '未归类任务' : '任务排序';
+              _openSortDialog(
+                title: title,
+                source: tasks,
+              );
+            },
           ),
         )
         .toList();

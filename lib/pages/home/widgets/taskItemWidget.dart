@@ -5,6 +5,7 @@ import '../../../models/task.dart';
 class TaskItemWidget extends StatelessWidget {
   final Task task;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final ValueChanged<bool>? onCompletedChanged;
   final List<String> rightAlignedLines;
 
@@ -12,6 +13,7 @@ class TaskItemWidget extends StatelessWidget {
     super.key,
     required this.task,
     this.onTap,
+    this.onLongPress,
     this.onCompletedChanged,
     this.rightAlignedLines = const [],
   });
@@ -23,6 +25,7 @@ class TaskItemWidget extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
+      onLongPress: onLongPress,
       leading: Checkbox(
         value: completed,
         onChanged: (value) {

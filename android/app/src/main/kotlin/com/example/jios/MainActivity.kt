@@ -5,6 +5,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import com.example.jios.widget.BaseDayMasterWidgetProvider
+import com.example.jios.notification.TaskNotificationScheduler
 
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -30,6 +31,30 @@ class MainActivity : FlutterActivity() {
                             prefs.edit().putString("flutter.$key", value).apply()
                             result.success(null)
                         }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "task_notification")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "request_permission" -> {
+                        TaskNotificationScheduler.requestPermission(this)
+                        result.success(null)
+                    }
+                    "cancel_task_notifications" -> {
+                        val args = call.arguments as? Map<*, *>
+                        val taskId = (args?.get("task_id") as? Number)?.toInt()
+                        if (taskId != null) {
+                            TaskNotificationScheduler.cancelTaskNotifications(this, taskId)
+                        }
+                        result.success(null)
+                    }
+                    "sync_task_notifications" -> {
+                        val args = call.arguments as? Map<*, *> ?: emptyMap<String, Any?>()
+                        TaskNotificationScheduler.syncTaskNotifications(this, args)
+                        result.success(null)
                     }
                     else -> result.notImplemented()
                 }
