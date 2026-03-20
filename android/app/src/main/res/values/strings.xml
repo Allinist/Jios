@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">jios</string>
+    <string name="widget_desc_configured">按设置显示今日日程/任务本/指定任务</string>
+    <string name="widget_desc_today">显示今日未完成日程</string>
+    <string name="widget_desc_book">显示设置中选定任务本的未完成日程</string>
+    <string name="widget_desc_selected">显示设置中选定的一组日程</string>
+    <string name="widget_desc_all">显示全部未完成日程</string>
+</resources>
