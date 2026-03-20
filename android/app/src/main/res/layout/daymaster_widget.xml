@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="6dp"
+    android:background="@drawable/daymaster_widget_bg">
+
+    <TextView
+        android:id="@+id/widgetTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="#1F2937"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/widgetEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="11sp"
+        android:textColor="#6B7280"
+        android:visibility="gone" />
+
+    <TextView android:id="@+id/widgetLine1" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine2" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine3" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine4" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine5" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine6" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine7" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine8" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine9" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine10" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine11" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine12" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine13" style="@style/DayMasterWidgetLine" />
+    <TextView android:id="@+id/widgetLine14" style="@style/DayMasterWidgetLine" />
+
+</LinearLayout>
