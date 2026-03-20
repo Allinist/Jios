@@ -9,6 +9,7 @@ import '../../models/task.dart';
 import '../../models/taskBook.dart';
 import '../home/widgets/taskItemWidget.dart';
 import '../task/taskDetailPage.dart';
+import '../../services/notificationService.dart';
 import '../../services/widgetServices.dart';
 import 'taskBookEditPage.dart';
 
@@ -231,9 +232,15 @@ class _TaskBookPageState extends State<TaskBookPage> {
                 color: task.color,
                 timelineDisplayMask: task.timelineDisplayMask,
                 timelineGranularity: task.timelineGranularity,
+                notifyAtStart: task.notifyAtStart,
+                notifyBeforeStartMinutes: task.notifyBeforeStartMinutes,
+                notifyAtEnd: task.notifyAtEnd,
+                notifyBeforeEndMinutes: task.notifyBeforeEndMinutes,
+                widgetDisplayScopes: task.widgetDisplayScopes,
               );
 
               await _taskDao.update(updated);
+              await NotificationService.syncTaskNotifications(updated);
               await WidgetService.syncWidgetData();
               await WidgetService.refreshWidget();
               await _loadData();

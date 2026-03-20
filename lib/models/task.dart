@@ -15,6 +15,11 @@ class Task {
   int? color;
   int? timelineDisplayMask;
   String? timelineGranularity;
+  int? notifyAtStart;
+  int? notifyBeforeStartMinutes;
+  int? notifyAtEnd;
+  int? notifyBeforeEndMinutes;
+  String? widgetDisplayScopes;
 
   Task({
     this.id,
@@ -33,6 +38,11 @@ class Task {
     this.color,
     this.timelineDisplayMask,
     this.timelineGranularity,
+    this.notifyAtStart,
+    this.notifyBeforeStartMinutes,
+    this.notifyAtEnd,
+    this.notifyBeforeEndMinutes,
+    this.widgetDisplayScopes,
   });
 
   Map<String, dynamic> toMap() {
@@ -53,6 +63,11 @@ class Task {
       'color': color,
       'timeline_display_mask': timelineDisplayMask,
       'timeline_granularity': timelineGranularity,
+      'notify_at_start': notifyAtStart,
+      'notify_before_start_minutes': notifyBeforeStartMinutes,
+      'notify_at_end': notifyAtEnd,
+      'notify_before_end_minutes': notifyBeforeEndMinutes,
+      'widget_display_scopes': widgetDisplayScopes,
     };
   }
 
@@ -74,6 +89,11 @@ class Task {
       color: map['color'],
       timelineDisplayMask: map['timeline_display_mask'],
       timelineGranularity: map['timeline_granularity'],
+      notifyAtStart: map['notify_at_start'],
+      notifyBeforeStartMinutes: map['notify_before_start_minutes'],
+      notifyAtEnd: map['notify_at_end'],
+      notifyBeforeEndMinutes: map['notify_before_end_minutes'],
+      widgetDisplayScopes: map['widget_display_scopes'],
     );
   }
 }

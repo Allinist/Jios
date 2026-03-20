@@ -29,7 +29,12 @@ CREATE TABLE tasks (
     updated_at INTEGER,
     color INTEGER,
     timeline_display_mask INTEGER,
-    timeline_granularity TEXT
+    timeline_granularity TEXT,
+    notify_at_start INTEGER,
+    notify_before_start_minutes INTEGER,
+    notify_at_end INTEGER,
+    notify_before_end_minutes INTEGER,
+    widget_display_scopes TEXT
 );
 ''');
 
@@ -96,6 +101,45 @@ CREATE TABLE widget_cache (
         db: db,
         table: 'tasks',
         column: 'timeline_granularity',
+        definition: 'TEXT',
+      );
+    }
+
+    if (oldVersion < 4) {
+      await _addColumnIfNotExists(
+        db: db,
+        table: 'tasks',
+        column: 'notify_at_start',
+        definition: 'INTEGER',
+      );
+
+      await _addColumnIfNotExists(
+        db: db,
+        table: 'tasks',
+        column: 'notify_before_start_minutes',
+        definition: 'INTEGER',
+      );
+
+      await _addColumnIfNotExists(
+        db: db,
+        table: 'tasks',
+        column: 'notify_at_end',
+        definition: 'INTEGER',
+      );
+
+      await _addColumnIfNotExists(
+        db: db,
+        table: 'tasks',
+        column: 'notify_before_end_minutes',
+        definition: 'INTEGER',
+      );
+    }
+
+    if (oldVersion < 5) {
+      await _addColumnIfNotExists(
+        db: db,
+        table: 'tasks',
+        column: 'widget_display_scopes',
         definition: 'TEXT',
       );
     }
