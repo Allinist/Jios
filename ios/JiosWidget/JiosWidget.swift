@@ -181,15 +181,18 @@ private struct DayMasterWidgetEntryView: View {
     var smallView: some View {
         VStack(alignment: .leading) {
             Text(entry.title)
-                .font(.headline)
+                .font(.caption)
+                .fontWeight(.semibold)
 
-            if let task = entry.tasks.first {
-                Text("• \(task.title)")
-                    .font(.caption)
-                    .lineLimit(2)
-            } else {
+            if displayTasks.isEmpty {
                 Text("无任务")
-                    .font(.caption)
+                    .font(.caption2)
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(displayTasks.prefix(3)) { item in
+                        taskCell(item.task)
+                    }
+                }
             }
         }
         .padding()
@@ -198,25 +201,14 @@ private struct DayMasterWidgetEntryView: View {
     var mediumView: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(entry.title)
-                .font(.headline)
+                .font(.caption)
+                .fontWeight(.semibold)
 
             if displayTasks.isEmpty {
                 Text("无任务")
-                    .font(.caption)
+                    .font(.caption2)
             } else {
-                ForEach(displayTasks.prefix(4)) { item in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("• \(item.task.title)")
-                            .font(.caption)
-                            .lineLimit(1)
-
-                        if !item.task.time.isEmpty {
-                            Text(item.task.time)
-                                .font(.caption2)
-                                .foregroundColor(.gray)
-                        }
-                    }
-                }
+                twoColumnGrid(items: Array(displayTasks.prefix(4)))
             }
         }
         .padding()
@@ -224,28 +216,15 @@ private struct DayMasterWidgetEntryView: View {
 
     var largeView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Day Master")
-                .font(.title3)
-
             Text(entry.title)
-                .font(.headline)
+                .font(.caption)
+                .fontWeight(.semibold)
 
             if displayTasks.isEmpty {
                 Text("无任务")
-                    .font(.caption)
+                    .font(.caption2)
             } else {
-                ForEach(displayTasks) { item in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("• \(item.task.title)")
-                            .lineLimit(1)
-
-                        if !item.task.time.isEmpty {
-                            Text(item.task.time)
-                                .font(.caption2)
-                                .foregroundColor(.gray)
-                        }
-                    }
-                }
+                twoColumnGrid(items: Array(displayTasks.prefix(8)))
             }
 
             Spacer()
@@ -275,7 +254,7 @@ private struct DayMasterWidgetEntryView: View {
     var rectangularView: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(entry.title)
-                .font(.caption)
+                .font(.caption2)
                 .fontWeight(.semibold)
 
             if let first = entry.tasks.first {
@@ -287,6 +266,38 @@ private struct DayMasterWidgetEntryView: View {
                     .font(.caption2)
             }
         }
+    }
+
+    @ViewBuilder
+    private func twoColumnGrid(items: [DisplayTask]) -> some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), alignment: .topLeading),
+                GridItem(.flexible(), alignment: .topLeading),
+            ],
+            spacing: 6
+        ) {
+            ForEach(items) { item in
+                taskCell(item.task)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func taskCell(_ task: WidgetTask) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("• \(task.title)")
+                .font(.caption2)
+                .lineLimit(1)
+
+            if !task.time.isEmpty {
+                Text(task.time)
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
