@@ -295,7 +295,7 @@ private struct DayMasterWidgetEntryView: View {
                 Text("无任务")
                     .font(.caption2)
             } else {
-                ForEach(displayTasks.prefix(3)) { item in
+                ForEach(displayTasks.prefix(4)) { item in
                     taskRow(item.task)
                 }
             }
@@ -390,21 +390,14 @@ private func makeWidgetConfiguration(
 }
 
 private func supportedFamilies() -> [WidgetFamily] {
-    var families: [WidgetFamily] = [
+    [
         .systemSmall,
         .systemMedium,
         .systemLarge,
+        .accessoryInline,
+        .accessoryRectangular,
+        .accessoryCircular,
     ]
-
-    if #available(iOSApplicationExtension 16.0, *) {
-        families.append(contentsOf: [
-            .accessoryInline,
-            .accessoryRectangular,
-            .accessoryCircular,
-        ])
-    }
-
-    return families
 }
 
 struct JiosConfiguredWidget: Widget {
@@ -462,46 +455,30 @@ struct JiosAllWidget: Widget {
     }
 }
 
-private func makeLockscreenConfiguration(
-    kind: String,
-    title: String,
-    description: String,
-    mode: WidgetMode,
-    configKeyOverride: String? = nil
-) -> some WidgetConfiguration {
-    StaticConfiguration(
-        kind: kind,
-        provider: Provider(
-            mode: mode,
-            title: title,
-            configKeyOverride: configKeyOverride,
-            hideLockscreenTitle: true
-        )
-    ) { entry in
-        if #available(iOSApplicationExtension 17.0, *) {
-            DayMasterWidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
-        } else {
-            DayMasterWidgetEntryView(entry: entry)
-        }
-    }
-    .configurationDisplayName(title)
-    .description(description)
-    .supportedFamilies([
-        .accessoryCircular,
-        .accessoryRectangular,
-        .accessoryInline,
-    ])
-}
-
 struct JiosLockSelectedWidget: Widget {
     var body: some WidgetConfiguration {
-        makeLockscreenConfiguration(
+        StaticConfiguration(
             kind: "DayMasterLockSelectedWidget",
-            title: "锁屏选定任务",
-            description: "锁屏显示手动选择任务",
-            mode: .selected,
-            configKeyOverride: "widget_config_lock_selected"
-        )
+            provider: Provider(
+                mode: .selected,
+                title: "锁屏选定任务",
+                configKeyOverride: "widget_config_lock_selected",
+                hideLockscreenTitle: true
+            )
+        ) { entry in
+            if #available(iOSApplicationExtension 17.0, *) {
+                DayMasterWidgetEntryView(entry: entry)
+                    .containerBackground(.fill.tertiary, for: .widget)
+            } else {
+                DayMasterWidgetEntryView(entry: entry)
+            }
+        }
+        .configurationDisplayName("锁屏选定任务")
+        .description("锁屏显示手动选择任务")
+        .supportedFamilies([
+            .accessoryCircular,
+            .accessoryRectangular,
+            .accessoryInline,
+        ])
     }
 }

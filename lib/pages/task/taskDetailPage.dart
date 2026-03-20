@@ -538,6 +538,58 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     Navigator.pop(context, true);
   }
 
+  Future<void> _duplicateTask() async {
+    if (_title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('任务名称不能为空')),
+      );
+      return;
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    int? copiedRepeatRuleId;
+    if (_repeatRule != null) {
+      final copiedRule = _cloneRepeatRule(_repeatRule!);
+      copiedRepeatRuleId = await _repeatRuleDao.insert(copiedRule);
+    }
+
+    final duplicated = Task(
+      title: _title,
+      description: _description.isEmpty ? null : _description,
+      taskBookId: _taskBookId,
+      taskType: widget.task?.taskType,
+      priority: widget.task?.priority,
+      status: 'active',
+      startDate: _startDate?.millisecondsSinceEpoch,
+      endDate: _endDate?.millisecondsSinceEpoch,
+      expectedDuration: _expectedDurationMinutes,
+      repeatRuleId: copiedRepeatRuleId,
+      timelineDisplayMask: _timelineDisplayMask,
+      timelineGranularity: _timelineGranularity.join(','),
+      notifyAtStart: _notifyAtStart ? 1 : 0,
+      notifyBeforeStartMinutes: _notifyBeforeStartMinutes,
+      notifyAtEnd: _notifyAtEnd ? 1 : 0,
+      notifyBeforeEndMinutes: _notifyBeforeEndMinutes,
+      widgetDisplayScopes: _widgetDisplayScopes.join(','),
+      widgetInfoType: _widgetInfoType,
+      color: _color,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final id = await _taskDao.insert(duplicated);
+    duplicated.id = id;
+
+    await NotificationService.syncTaskNotifications(duplicated);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('已复制为新任务')),
+    );
+    Navigator.pop(context, true);
+  }
+
   Future<void> _deleteTask() async {
     if (_taskId == null) return;
 
@@ -819,6 +871,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       appBar: AppBar(
         title: Text(_isCreate ? '创建任务' : '任务详情'),
         actions: [
+          if (!_isCreate)
+            IconButton(
+              icon: const Icon(Icons.copy_outlined),
+              tooltip: '复制任务',
+              onPressed: _duplicateTask,
+            ),
           if (!_isCreate)
             IconButton(
               icon: const Icon(Icons.delete_outline),
@@ -1159,5 +1217,11 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       default:
         return rule.repeatType!;
     }
+  }
+
+  RepeatRule _cloneRepeatRule(RepeatRule rule) {
+    final map = Map<String, dynamic>.from(rule.toMap());
+    map['id'] = null;
+    return RepeatRule.fromMap(map);
   }
 }

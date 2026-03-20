@@ -829,7 +829,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JiosWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = JiosWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = Jios;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -871,7 +871,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JiosWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = JiosWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = Jios;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -910,7 +910,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JiosWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = JiosWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = Jios;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
