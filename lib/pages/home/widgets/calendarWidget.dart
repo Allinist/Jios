@@ -183,8 +183,12 @@ class _CalendarWidgetState extends State<CalendarWidget> {
       itemBuilder: (context, index) {
         final DateTime date = days[index];
         final bool selected = _isSameDay(date, widget.selectedDate);
+        final bool isToday = _isSameDay(date, DateTime.now());
         final bool inDisplayMonth = isInDisplayMonth(date);
         final List<Color> dots = widget.dateColorDots[_keyOf(date)] ?? const [];
+        final Color cellBackground = selected
+            ? Colors.blue
+            : (isToday ? Colors.grey.shade300 : Colors.transparent);
 
         return GestureDetector(
           onTap: () {
@@ -192,7 +196,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: selected ? Colors.blue : Colors.transparent,
+              color: cellBackground,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -203,7 +207,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                     '${date.day}',
                     style: TextStyle(
                       color: selected ? Colors.white : (inDisplayMonth ? Colors.black87 : Colors.black38),
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: (selected || isToday) ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
                   if (dots.isNotEmpty) ...[
