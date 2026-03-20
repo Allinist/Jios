@@ -5,8 +5,8 @@ on:
   push:
     tags:
       - 'v*'             # tag 触发
-    branches:
-      - 'release'        # release 分支触发
+    # branches:
+    #   - 'release'        # release 分支触发
   workflow_dispatch:
     inputs:
       platform:
