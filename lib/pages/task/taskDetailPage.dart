@@ -12,10 +12,11 @@ import '../taskBook/taskBookEditPage.dart';
 
 class TaskDetailPage extends StatefulWidget {
   final Task? task;
+  final int? initialTaskBookId;
 
-  const TaskDetailPage({super.key, this.task});
+  const TaskDetailPage({super.key, this.task, this.initialTaskBookId});
 
-  const TaskDetailPage.create({super.key}) : task = null;
+  const TaskDetailPage.create({super.key, this.initialTaskBookId}) : task = null;
 
   @override
   State<TaskDetailPage> createState() => _TaskDetailPageState();
@@ -75,6 +76,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     _isCreate = widget.task == null;
     if (_isCreate) {
       _startDate = DateTime.now();
+      _taskBookId = widget.initialTaskBookId;
     }
     _initFromTask();
     _loadTaskBooks();
@@ -133,6 +135,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
     setState(() {
       _books = books;
+
+      if (_isCreate && _taskBookId != null && _color == null) {
+        for (final book in books) {
+          if (book.id == _taskBookId && book.color != null) {
+            _color = int.tryParse(book.color!);
+            break;
+          }
+        }
+      }
     });
   }
 

@@ -130,6 +130,21 @@ class _TaskBookPageState extends State<TaskBookPage> {
     }
   }
 
+  Future<void> _createTaskForBook(int? taskBookId) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TaskDetailPage.create(initialTaskBookId: taskBookId),
+      ),
+    );
+
+    if (changed == true) {
+      await WidgetService.syncWidgetData();
+      await WidgetService.refreshWidget();
+      await _loadData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,6 +184,11 @@ class _TaskBookPageState extends State<TaskBookPage> {
                     ? null
                     : Text(book.description!),
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.add_task),
+                    title: const Text('新增任务'),
+                    onTap: () => _createTaskForBook(book.id),
+                  ),
                   ..._buildTaskTiles(_tasksByBookId[book.id] ?? []),
                 ],
               ),
@@ -178,6 +198,11 @@ class _TaskBookPageState extends State<TaskBookPage> {
                 initiallyExpanded: true,
                 title: const Text('未归类任务'),
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.add_task),
+                    title: const Text('新增任务'),
+                    onTap: () => _createTaskForBook(null),
+                  ),
                   ..._buildTaskTiles(_unassignedTasks),
                 ],
               ),
