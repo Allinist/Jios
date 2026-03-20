@@ -83,8 +83,9 @@ private struct Provider: TimelineProvider {
             return []
         }
 
+        let configKey = configStorageKey()
         let config: WidgetConfig = {
-            guard let configString = defaults?.string(forKey: "widget_config"),
+            guard let configString = defaults?.string(forKey: configKey) ?? defaults?.string(forKey: "widget_config"),
                   let configData = configString.data(using: .utf8),
                   let cfg = try? JSONDecoder().decode(WidgetConfig.self, from: configData) else {
                 return WidgetConfig(mode: "today", taskBookId: nil, taskIds: [])
@@ -129,6 +130,19 @@ private struct Provider: TimelineProvider {
 
     private func isCompleted(_ task: WidgetTask) -> Bool {
         task.completed || task.status == "completed"
+    }
+
+    private func configStorageKey() -> String {
+        switch mode {
+        case .book:
+            return "widget_config_book"
+        case .selected:
+            return "widget_config_selected"
+        case .configured:
+            return "widget_config_configured"
+        default:
+            return "widget_config_configured"
+        }
     }
 }
 

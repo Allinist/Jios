@@ -6,6 +6,7 @@ import '../../../database/dao/taskDao.dart';
 import '../../../models/repeatRule.dart';
 import '../../../models/task.dart';
 import '../../../pages/task/taskDetailPage.dart';
+import '../../../services/notificationService.dart';
 import '../../../services/widgetServices.dart';
 import 'taskItemWidget.dart';
 
@@ -153,9 +154,14 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                 color: task.color,
                 timelineDisplayMask: task.timelineDisplayMask,
                 timelineGranularity: task.timelineGranularity,
+                notifyAtStart: task.notifyAtStart,
+                notifyBeforeStartMinutes: task.notifyBeforeStartMinutes,
+                notifyAtEnd: task.notifyAtEnd,
+                notifyBeforeEndMinutes: task.notifyBeforeEndMinutes,
               );
 
               await TaskDao().update(updated);
+              await NotificationService.syncTaskNotifications(updated);
               await loadTasks();
             },
             onTap: () async {

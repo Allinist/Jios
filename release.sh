@@ -51,3 +51,5 @@ echo "✅ release 分支更新完成"
 echo "🚀 GitHub Actions workflow 将在 release 分支或 tag 上触发构建"
 echo "🌐 平台: $PLATFORM (iOS / Android / All)"
 echo "📦 Release 将被标记为 latest"
+
+git checkout "$CURRENT_BRANCH"

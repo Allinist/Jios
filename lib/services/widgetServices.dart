@@ -15,7 +15,12 @@ class WidgetService {
   static const String _iosAppGroup = 'group.com.example.jios';
 
   static const String _tasksKey = 'widget_tasks';
-  static const String _configKey = 'widget_config';
+  static const String _legacyConfigKey = 'widget_config';
+  static const String _configPrefix = 'widget_config_';
+
+  static const String scopeConfigured = 'configured';
+  static const String scopeBook = 'book';
+  static const String scopeSelected = 'selected';
 
   static Future<void> syncWidgetData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -94,24 +99,35 @@ class WidgetService {
   }
 
   static Future<void> saveWidgetConfig({
+    required String scope,
     required String mode,
     int? taskBookId,
     List<int>? taskIds,
   }) async {
     final prefs = await SharedPreferences.getInstance();
+    final key = _configKey(scope);
     final payload = jsonEncode({
       'mode': mode,
       'task_book_id': taskBookId,
       'task_ids': taskIds ?? [],
     });
 
-    await prefs.setString(_configKey, payload);
-    await _saveSharedStringForIOS(key: _configKey, value: payload);
+    await prefs.setString(key, payload);
+    await _saveSharedStringForIOS(key: key, value: payload);
+
+    if (scope == scopeConfigured) {
+      await prefs.setString(_legacyConfigKey, payload);
+      await _saveSharedStringForIOS(key: _legacyConfigKey, value: payload);
+    }
   }
 
-  static Future<Map<String, dynamic>> loadWidgetConfig() async {
+  static Future<Map<String, dynamic>> loadWidgetConfig({
+    required String scope,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    final text = prefs.getString(_configKey);
+    final key = _configKey(scope);
+    final text = prefs.getString(key) ??
+        (scope == scopeConfigured ? prefs.getString(_legacyConfigKey) : null);
 
     if (text == null || text.isEmpty) {
       return {
@@ -145,6 +161,10 @@ class WidgetService {
     try {
       await platform.invokeMethod('reload');
     } catch (_) {}
+  }
+
+  static String _configKey(String scope) {
+    return '$_configPrefix$scope';
   }
 
   static Future<void> _saveSharedStringForIOS({

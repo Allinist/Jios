@@ -18,9 +18,11 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _busy = false;
 
-  String _widgetMode = 'today';
-  int? _widgetTaskBookId;
-  List<int> _widgetTaskIds = [];
+  String _configuredWidgetMode = 'today';
+  int? _configuredWidgetTaskBookId;
+  List<int> _configuredWidgetTaskIds = [];
+  int? _bookWidgetTaskBookId;
+  List<int> _selectedWidgetTaskIds = [];
 
   List<TaskBook> _books = [];
   List<Task> _tasks = [];
@@ -34,31 +36,68 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadWidgetConfigData() async {
     final books = await TaskBookDao().getAll();
     final tasks = await TaskDao().getAll();
-    final config = await WidgetService.loadWidgetConfig();
+    final configured = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeConfigured);
+    final book = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeBook);
+    final selected = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeSelected);
 
     if (!mounted) return;
 
     setState(() {
       _books = books;
       _tasks = tasks;
-      _widgetMode = config['mode'] as String? ?? 'today';
-      _widgetTaskBookId = config['task_book_id'] as int?;
-      _widgetTaskIds = (config['task_ids'] as List? ?? []).whereType<int>().toList();
+      _configuredWidgetMode = configured['mode'] as String? ?? 'today';
+      _configuredWidgetTaskBookId = configured['task_book_id'] as int?;
+      _configuredWidgetTaskIds = (configured['task_ids'] as List? ?? []).whereType<int>().toList();
+      _bookWidgetTaskBookId = book['task_book_id'] as int?;
+      _selectedWidgetTaskIds = (selected['task_ids'] as List? ?? []).whereType<int>().toList();
     });
   }
 
-  Future<void> _saveWidgetConfig() async {
+  Future<void> _saveConfiguredWidgetConfig() async {
     await WidgetService.saveWidgetConfig(
-      mode: _widgetMode,
-      taskBookId: _widgetTaskBookId,
-      taskIds: _widgetTaskIds,
+      scope: WidgetService.scopeConfigured,
+      mode: _configuredWidgetMode,
+      taskBookId: _configuredWidgetTaskBookId,
+      taskIds: _configuredWidgetTaskIds,
     );
     await WidgetService.syncWidgetData();
     await WidgetService.refreshWidget();
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('小组件配置已更新')),
+      const SnackBar(content: Text('按设置小组件配置已更新')),
+    );
+  }
+
+  Future<void> _saveBookWidgetConfig() async {
+    await WidgetService.saveWidgetConfig(
+      scope: WidgetService.scopeBook,
+      mode: 'book',
+      taskBookId: _bookWidgetTaskBookId,
+      taskIds: const [],
+    );
+    await WidgetService.syncWidgetData();
+    await WidgetService.refreshWidget();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('任务本小组件配置已更新')),
+    );
+  }
+
+  Future<void> _saveSelectedWidgetConfig() async {
+    await WidgetService.saveWidgetConfig(
+      scope: WidgetService.scopeSelected,
+      mode: 'selected',
+      taskBookId: null,
+      taskIds: _selectedWidgetTaskIds,
+    );
+    await WidgetService.syncWidgetData();
+    await WidgetService.refreshWidget();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('选定日程小组件配置已更新')),
     );
   }
 
@@ -70,12 +109,12 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           ExpansionTile(
             initiallyExpanded: true,
-            title: const Text('iOS 小组件配置'),
-            subtitle: const Text('可选择今日日程、指定任务本、指定任务'),
+            title: const Text('按设置小组件配置'),
+            subtitle: const Text('对应“日程（按设置）”小组件'),
             childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
               DropdownButtonFormField<String>(
-                initialValue: _widgetMode,
+                initialValue: _configuredWidgetMode,
                 decoration: const InputDecoration(
                   labelText: '显示模式',
                   border: OutlineInputBorder(),
@@ -87,14 +126,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
                 onChanged: (value) {
                   setState(() {
-                    _widgetMode = value ?? 'today';
+                    _configuredWidgetMode = value ?? 'today';
                   });
                 },
               ),
               const SizedBox(height: 12),
-              if (_widgetMode == 'book')
+              if (_configuredWidgetMode == 'book')
                 DropdownButtonFormField<int?>(
-                  initialValue: _widgetTaskBookId,
+                  initialValue: _configuredWidgetTaskBookId,
                   decoration: const InputDecoration(
                     labelText: '任务本',
                     border: OutlineInputBorder(),
@@ -109,21 +148,72 @@ class _SettingsPageState extends State<SettingsPage> {
                       .toList(),
                   onChanged: (value) {
                     setState(() {
-                      _widgetTaskBookId = value;
+                      _configuredWidgetTaskBookId = value;
                     });
                   },
                 ),
-              if (_widgetMode == 'selected')
+              if (_configuredWidgetMode == 'selected')
                 OutlinedButton.icon(
-                  onPressed: _pickWidgetTasks,
+                  onPressed: () => _pickWidgetTasks(configured: true),
                   icon: const Icon(Icons.checklist),
-                  label: Text('已选择 ${_widgetTaskIds.length} 个任务，点击修改'),
+                  label: Text('已选择 ${_configuredWidgetTaskIds.length} 个任务，点击修改'),
                 ),
               const SizedBox(height: 8),
               FilledButton.icon(
-                onPressed: _saveWidgetConfig,
+                onPressed: _saveConfiguredWidgetConfig,
                 icon: const Icon(Icons.save),
                 label: const Text('保存小组件配置'),
+              ),
+            ],
+          ),
+          ExpansionTile(
+            title: const Text('任务本小组件配置'),
+            subtitle: const Text('对应“任务本日程”小组件'),
+            childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            children: [
+              DropdownButtonFormField<int?>(
+                initialValue: _bookWidgetTaskBookId,
+                decoration: const InputDecoration(
+                  labelText: '任务本',
+                  border: OutlineInputBorder(),
+                ),
+                items: _books
+                    .map(
+                      (book) => DropdownMenuItem<int?>(
+                        value: book.id,
+                        child: Text(book.name),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _bookWidgetTaskBookId = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: _saveBookWidgetConfig,
+                icon: const Icon(Icons.save),
+                label: const Text('保存任务本小组件配置'),
+              ),
+            ],
+          ),
+          ExpansionTile(
+            title: const Text('选定日程小组件配置'),
+            subtitle: const Text('对应“选定日程”小组件'),
+            childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _pickWidgetTasks(configured: false),
+                icon: const Icon(Icons.checklist),
+                label: Text('已选择 ${_selectedWidgetTaskIds.length} 个任务，点击修改'),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: _saveSelectedWidgetConfig,
+                icon: const Icon(Icons.save),
+                label: const Text('保存选定日程小组件配置'),
               ),
             ],
           ),
@@ -149,8 +239,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<void> _pickWidgetTasks() async {
-    final selected = {..._widgetTaskIds};
+  Future<void> _pickWidgetTasks({required bool configured}) async {
+    final selected = configured ? {..._configuredWidgetTaskIds} : {..._selectedWidgetTaskIds};
 
     final ok = await showDialog<bool>(
       context: context,
@@ -197,7 +287,11 @@ class _SettingsPageState extends State<SettingsPage> {
     if (ok != true) return;
 
     setState(() {
-      _widgetTaskIds = selected.toList();
+      if (configured) {
+        _configuredWidgetTaskIds = selected.toList();
+      } else {
+        _selectedWidgetTaskIds = selected.toList();
+      }
     });
   }
 

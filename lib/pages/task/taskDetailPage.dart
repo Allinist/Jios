@@ -6,6 +6,7 @@ import '../../database/dao/taskDao.dart';
 import '../../models/repeatRule.dart';
 import '../../models/task.dart';
 import '../../models/taskBook.dart';
+import '../../services/notificationService.dart';
 import '../repeatRuleEditor/repeatRuleEditorPage.dart';
 import '../taskBook/taskBookEditPage.dart';
 
@@ -45,6 +46,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   DateTime? _startDate;
   DateTime? _endDate;
   int? _expectedDurationMinutes;
+  bool _notifyAtStart = false;
+  int? _notifyBeforeStartMinutes;
+  bool _notifyAtEnd = false;
+  int? _notifyBeforeEndMinutes;
 
   int _timelineDisplayMask = _displayElapsed | _displayRemaining | _displayDuration;
   List<String> _timelineGranularity = ['day', 'hour'];
@@ -83,6 +88,11 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     if (task.timelineDisplayMask != null) {
       _timelineDisplayMask = task.timelineDisplayMask!;
     }
+
+    _notifyAtStart = task.notifyAtStart == 1;
+    _notifyBeforeStartMinutes = task.notifyBeforeStartMinutes;
+    _notifyAtEnd = task.notifyAtEnd == 1;
+    _notifyBeforeEndMinutes = task.notifyBeforeEndMinutes;
 
     final granularityText = task.timelineGranularity;
     if (granularityText != null && granularityText.trim().isNotEmpty) {
@@ -488,15 +498,22 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       repeatRuleId: nextRepeatRuleId,
       timelineDisplayMask: _timelineDisplayMask,
       timelineGranularity: _timelineGranularity.join(','),
+      notifyAtStart: _notifyAtStart ? 1 : 0,
+      notifyBeforeStartMinutes: _notifyBeforeStartMinutes,
+      notifyAtEnd: _notifyAtEnd ? 1 : 0,
+      notifyBeforeEndMinutes: _notifyBeforeEndMinutes,
       createdAt: widget.task?.createdAt ?? now,
       updatedAt: now,
     );
 
     if (_isCreate) {
-      await _taskDao.insert(task);
+      final id = await _taskDao.insert(task);
+      task.id = id;
     } else {
       await _taskDao.update(task);
     }
+
+    await NotificationService.syncTaskNotifications(task);
 
     if (!mounted) return;
     Navigator.pop(context, true);
@@ -526,9 +543,142 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     if (ok != true) return;
 
     await _taskDao.delete(_taskId!);
+    await NotificationService.cancelTaskNotifications(_taskId!);
 
     if (!mounted) return;
     Navigator.pop(context, true);
+  }
+
+  Future<void> _editReminder() async {
+    final (startDays, startHours, startMinutes) = _splitMinutes(_notifyBeforeStartMinutes);
+    final (endDays, endHours, endMinutes) = _splitMinutes(_notifyBeforeEndMinutes);
+    final startDayController = TextEditingController(text: startDays == 0 ? '' : '$startDays');
+    final startHourController = TextEditingController(text: startHours == 0 ? '' : '$startHours');
+    final startMinuteController = TextEditingController(text: startMinutes == 0 ? '' : '$startMinutes');
+    final endDayController = TextEditingController(text: endDays == 0 ? '' : '$endDays');
+    final endHourController = TextEditingController(text: endHours == 0 ? '' : '$endHours');
+    final endMinuteController = TextEditingController(text: endMinutes == 0 ? '' : '$endMinutes');
+    bool notifyAtStart = _notifyAtStart;
+    bool notifyAtEnd = _notifyAtEnd;
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('系统提醒'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CheckboxListTile(
+                  value: notifyAtStart,
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('开始时提醒'),
+                  onChanged: (value) {
+                    setDialogState(() {
+                      notifyAtStart = value ?? false;
+                    });
+                  },
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: startDayController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: '开始前天'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: startHourController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: '开始前小时'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: startMinuteController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: '开始前分钟'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                CheckboxListTile(
+                  value: notifyAtEnd,
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('结束时提醒'),
+                  onChanged: (value) {
+                    setDialogState(() {
+                      notifyAtEnd = value ?? false;
+                    });
+                  },
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: endDayController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: '结束前天'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: endHourController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: '结束前小时'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: endMinuteController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: '结束前分钟'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (ok != true) return;
+
+    setState(() {
+      _notifyAtStart = notifyAtStart;
+      _notifyAtEnd = notifyAtEnd;
+      _notifyBeforeStartMinutes = _toMinutes(
+        days: int.tryParse(startDayController.text.trim()) ?? 0,
+        hours: int.tryParse(startHourController.text.trim()) ?? 0,
+        minutes: int.tryParse(startMinuteController.text.trim()) ?? 0,
+      );
+      _notifyBeforeEndMinutes = _toMinutes(
+        days: int.tryParse(endDayController.text.trim()) ?? 0,
+        hours: int.tryParse(endHourController.text.trim()) ?? 0,
+        minutes: int.tryParse(endMinuteController.text.trim()) ?? 0,
+      );
+    });
   }
 
   bool _hasDisplayFlag(int flag) {
@@ -649,6 +799,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             onTap: _pickColor,
           ),
           ListTile(
+            title: const Text('系统提醒'),
+            subtitle: Text(_reminderSummary()),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _editReminder,
+          ),
+          ListTile(
             title: const Text('重复规则'),
             subtitle: Text(_repeatRuleLabel(_repeatRule)),
             trailing: const Icon(Icons.chevron_right),
@@ -756,6 +912,56 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     final h = minutes ~/ 60;
     final m = minutes % 60;
     return '$h小时 $m分钟';
+  }
+
+  String _formatReminderOffset(int minutes) {
+    final days = minutes ~/ (24 * 60);
+    final hours = (minutes % (24 * 60)) ~/ 60;
+    final mins = minutes % 60;
+    final parts = <String>[];
+    if (days > 0) parts.add('$days天');
+    if (hours > 0) parts.add('$hours小时');
+    if (mins > 0 || parts.isEmpty) parts.add('$mins分钟');
+    return parts.join('');
+  }
+
+  (int, int, int) _splitMinutes(int? totalMinutes) {
+    if (totalMinutes == null || totalMinutes <= 0) {
+      return (0, 0, 0);
+    }
+    final days = totalMinutes ~/ (24 * 60);
+    final hours = (totalMinutes % (24 * 60)) ~/ 60;
+    final mins = totalMinutes % 60;
+    return (days, hours, mins);
+  }
+
+  int? _toMinutes({
+    required int days,
+    required int hours,
+    required int minutes,
+  }) {
+    final total = days * 24 * 60 + hours * 60 + minutes;
+    return total <= 0 ? null : total;
+  }
+
+  String _reminderSummary() {
+    final parts = <String>[];
+    if (_notifyAtStart) {
+      parts.add('开始时');
+    }
+    if (_notifyBeforeStartMinutes != null && _notifyBeforeStartMinutes! > 0) {
+      parts.add('开始前${_formatReminderOffset(_notifyBeforeStartMinutes!)}');
+    }
+    if (_notifyAtEnd) {
+      parts.add('结束时');
+    }
+    if (_notifyBeforeEndMinutes != null && _notifyBeforeEndMinutes! > 0) {
+      parts.add('结束前${_formatReminderOffset(_notifyBeforeEndMinutes!)}');
+    }
+    if (parts.isEmpty) {
+      return '未设置';
+    }
+    return parts.join('、');
   }
 
   String _repeatRuleLabel(RepeatRule? rule) {
