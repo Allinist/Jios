@@ -19,30 +19,31 @@ if [[ -n $(git status -s) ]]; then
   git commit -m "chore: auto commit before release"
 fi
 
-# ========= 自动生成 tag =========
-# 获取最新 tag 的版本号
+# ========= 获取最新 tag 自动递增 =========
 LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 IFS='.' read -r MAJOR MINOR PATCH <<< "${LAST_TAG#v}"
 PATCH=$((PATCH+1))
 TAG="v$MAJOR.$MINOR.$PATCH"
 echo "🚀 发布版本: $TAG"
 
-# ========= 打 tag =========
+# ========= 打 tag 并 push 当前分支 =========
 git tag "$TAG"
-
-# ========= push 当前分支和 tag =========
 git push origin "$CURRENT_BRANCH"
 git push origin "$TAG"
+echo "✅ 当前分支提交 + tag 完成"
 
-# ========= 合并到 release 分支 =========
+# ========= 合并到 release =========
 echo "🔀 合并当前分支 $CURRENT_BRANCH 到 release"
 git fetch origin
 git checkout release
 git pull origin release
 git merge --no-ff "$CURRENT_BRANCH" -m "chore: merge $CURRENT_BRANCH into release for $TAG"
 
-# ========= push release =========
+# ========= push release 分支 =========
 git push origin release
+echo "✅ release 分支更新完成"
 
-echo "✅ 发布完成！GitHub Actions 将触发自动构建 (平台: $PLATFORM)"
-echo "👉 Release 将被标记为 latest"
+# ========= 提示构建 =========
+echo "🚀 GitHub Actions workflow 将在 release 分支或 tag 上触发构建"
+echo "🌐 平台: $PLATFORM (iOS / Android / All)"
+echo "📦 Release 将被标记为 latest"
