@@ -127,6 +127,7 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         children: [
           ExpansionTile(
+            key: const PageStorageKey<String>('settings_tile_configured_widget'),
             initiallyExpanded: true,
             title: const Text('按设置小组件配置'),
             subtitle: const Text('对应“日程（按设置）”小组件'),
@@ -186,6 +187,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           ExpansionTile(
+            key: const PageStorageKey<String>('settings_tile_book_widget'),
             title: const Text('任务本小组件配置'),
             subtitle: const Text('对应“任务本日程”小组件'),
             childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -219,6 +221,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           ExpansionTile(
+            key: const PageStorageKey<String>('settings_tile_selected_widget'),
             title: const Text('选定日程小组件配置'),
             subtitle: const Text('对应“选定日程”小组件'),
             childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -237,6 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           ExpansionTile(
+            key: const PageStorageKey<String>('settings_tile_lock_selected_widget'),
             title: const Text('锁屏选定任务小组件配置'),
             subtitle: const Text('对应“锁屏选定任务”小组件'),
             childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

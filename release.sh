@@ -3,7 +3,7 @@ set -e
 
 PLATFORM=$1
 if [ -z "$PLATFORM" ]; then
-  PLATFORM="all"
+  PLATFORM="ios"
 fi
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)

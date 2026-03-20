@@ -208,7 +208,7 @@ private struct DayMasterWidgetEntryView: View {
     }
 
     var smallView: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 1) {
             Text(entry.title)
                 .font(.caption)
                 .fontWeight(.semibold)
@@ -224,11 +224,11 @@ private struct DayMasterWidgetEntryView: View {
                 }
             }
         }
-        .padding(6)
+        .padding(4)
     }
 
     var mediumView: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(entry.title)
                 .font(.caption)
                 .fontWeight(.semibold)
@@ -240,11 +240,11 @@ private struct DayMasterWidgetEntryView: View {
                 twoColumnGrid(items: Array(displayTasks.prefix(12)))
             }
         }
-        .padding(6)
+        .padding(4)
     }
 
     var largeView: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(entry.title)
                 .font(.caption)
                 .fontWeight(.semibold)
@@ -258,7 +258,7 @@ private struct DayMasterWidgetEntryView: View {
 
             Spacer()
         }
-        .padding(6)
+        .padding(4)
     }
 
     var inlineView: some View {
@@ -309,7 +309,7 @@ private struct DayMasterWidgetEntryView: View {
                 GridItem(.flexible(), alignment: .topLeading),
                 GridItem(.flexible(), alignment: .topLeading),
             ],
-            spacing: 4
+            spacing: 2
         ) {
             ForEach(items) { item in
                 taskCell(item.task)
