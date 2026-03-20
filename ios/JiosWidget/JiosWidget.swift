@@ -17,6 +17,7 @@ private struct WidgetTask: Decodable {
     let completed: Bool
     let isToday: Bool
     let timelineLines: [String]
+    let widgetInfo: String
     let widgetScopes: [String]
 
     enum CodingKeys: String, CodingKey {
@@ -27,6 +28,7 @@ private struct WidgetTask: Decodable {
         case completed
         case isToday = "is_today"
         case timelineLines = "timeline_lines"
+        case widgetInfo = "widget_info"
         case widgetScopes = "widget_scopes"
     }
 
@@ -39,6 +41,7 @@ private struct WidgetTask: Decodable {
         completed = try container.decodeIfPresent(Bool.self, forKey: .completed) ?? false
         isToday = try container.decodeIfPresent(Bool.self, forKey: .isToday) ?? false
         timelineLines = try container.decodeIfPresent([String].self, forKey: .timelineLines) ?? []
+        widgetInfo = try container.decodeIfPresent(String.self, forKey: .widgetInfo) ?? ""
         widgetScopes = try container.decodeIfPresent([String].self, forKey: .widgetScopes) ?? []
     }
 }
@@ -68,22 +71,25 @@ private struct SimpleEntry: TimelineEntry {
     let date: Date
     let tasks: [WidgetTask]
     let title: String
+    let hideLockscreenTitle: Bool
 }
 
 private struct Provider: TimelineProvider {
     let mode: WidgetMode
     let title: String
+    let configKeyOverride: String?
+    let hideLockscreenTitle: Bool
 
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), tasks: [], title: title)
+        SimpleEntry(date: Date(), tasks: [], title: title, hideLockscreenTitle: hideLockscreenTitle)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> Void) {
-        completion(SimpleEntry(date: Date(), tasks: loadTasks(), title: title))
+        completion(SimpleEntry(date: Date(), tasks: loadTasks(), title: title, hideLockscreenTitle: hideLockscreenTitle))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
-        let entry = SimpleEntry(date: Date(), tasks: loadTasks(), title: title)
+        let entry = SimpleEntry(date: Date(), tasks: loadTasks(), title: title, hideLockscreenTitle: hideLockscreenTitle)
         let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(300)))
         completion(timeline)
     }
@@ -131,6 +137,9 @@ private struct Provider: TimelineProvider {
             return payload.tasks.filter { $0.isToday && !isCompleted($0) }
         case .selected:
             let selected = Set(config.taskIds)
+            if selected.isEmpty {
+                return payload.tasks.filter { $0.isToday && !isCompleted($0) }
+            }
             return payload.tasks.filter {
                 guard let id = $0.id else { return false }
                 return selected.contains(id) && !isCompleted($0)
@@ -147,6 +156,9 @@ private struct Provider: TimelineProvider {
     }
 
     private func configStorageKey() -> String {
+        if let key = configKeyOverride, !key.isEmpty {
+            return key
+        }
         switch mode {
         case .book:
             return "widget_config_book"
@@ -190,7 +202,7 @@ private struct DayMasterWidgetEntryView: View {
         let filtered = entry.tasks.filter { task in
             isTaskVisible(task: task, for: family)
         }
-        return Array(filtered.prefix(14).enumerated()).map { index, task in
+        return Array(filtered.prefix(30).enumerated()).map { index, task in
             DisplayTask(id: "\(task.id ?? -1)-\(index)-\(task.title)", task: task)
         }
     }
@@ -206,8 +218,8 @@ private struct DayMasterWidgetEntryView: View {
                     .font(.caption2)
             } else {
                 VStack(alignment: .leading, spacing: 1) {
-                    ForEach(displayTasks.prefix(4)) { item in
-                        smallTaskCell(item.task)
+                    ForEach(displayTasks.prefix(6)) { item in
+                        taskRow(item.task)
                     }
                 }
             }
@@ -225,7 +237,7 @@ private struct DayMasterWidgetEntryView: View {
                 Text("无任务")
                     .font(.caption2)
             } else {
-                twoColumnGrid(items: Array(displayTasks.prefix(6)))
+                twoColumnGrid(items: Array(displayTasks.prefix(12)))
             }
         }
         .padding(6)
@@ -241,7 +253,7 @@ private struct DayMasterWidgetEntryView: View {
                 Text("无任务")
                     .font(.caption2)
             } else {
-                twoColumnGrid(items: Array(displayTasks.prefix(14)))
+                twoColumnGrid(items: Array(displayTasks.prefix(24)))
             }
 
             Spacer()
@@ -250,17 +262,20 @@ private struct DayMasterWidgetEntryView: View {
     }
 
     var inlineView: some View {
-        if let task = entry.tasks.first {
-            return Text("\(entry.title): \(task.title)")
+        if let task = displayTasks.first?.task {
+            if task.widgetInfo.isEmpty {
+                return Text(task.title)
+            }
+            return Text("\(task.title) \(task.widgetInfo)")
         }
-        return Text("\(entry.title): 无任务")
+        return Text("无任务")
     }
 
     var circularView: some View {
         ZStack {
             Circle().fill(Color.blue.opacity(0.18))
             VStack(spacing: 2) {
-                Text("\(entry.tasks.count)")
+                Text("\(displayTasks.count)")
                     .font(.headline)
                 Text("项")
                     .font(.caption2)
@@ -269,26 +284,20 @@ private struct DayMasterWidgetEntryView: View {
     }
 
     var rectangularView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(entry.title)
-                .font(.caption2)
-                .fontWeight(.semibold)
+        VStack(alignment: .leading, spacing: 2) {
+            if !(entry.hideLockscreenTitle) {
+                Text(entry.title)
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+            }
 
-            if let first = entry.tasks.first {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("• \(first.title)")
-                        .font(.caption2)
-                        .lineLimit(1)
-                    if !first.timelineLines.isEmpty {
-                        Text(first.timelineLines.prefix(2).joined(separator: " · "))
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                            .lineLimit(1)
-                    }
-                }
-            } else {
+            if displayTasks.isEmpty {
                 Text("无任务")
                     .font(.caption2)
+            } else {
+                ForEach(displayTasks.prefix(3)) { item in
+                    taskRow(item.task)
+                }
             }
         }
     }
@@ -310,27 +319,25 @@ private struct DayMasterWidgetEntryView: View {
 
     @ViewBuilder
     private func taskCell(_ task: WidgetTask) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("• \(task.title)")
-                .font(.caption2)
-                .lineLimit(1)
-
-            if !task.timelineLines.isEmpty {
-                Text(task.timelineLines.prefix(2).joined(separator: " · "))
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                    .lineLimit(1)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        taskRow(task)
     }
 
     @ViewBuilder
-    private func smallTaskCell(_ task: WidgetTask) -> some View {
-        Text("• \(task.title)")
-            .font(.caption2)
-            .lineLimit(1)
-            .frame(maxWidth: .infinity, alignment: .leading)
+    private func taskRow(_ task: WidgetTask) -> some View {
+        HStack(spacing: 4) {
+            Text(task.title)
+                .font(.caption2)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            if !task.widgetInfo.isEmpty {
+                Text(task.widgetInfo)
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
+                    .multilineTextAlignment(.trailing)
+            }
+        }
     }
 
     private func isTaskVisible(task: WidgetTask, for family: WidgetFamily) -> Bool {
@@ -357,9 +364,19 @@ private func makeWidgetConfiguration(
     kind: String,
     title: String,
     description: String,
-    mode: WidgetMode
+    mode: WidgetMode,
+    hideLockscreenTitle: Bool = true,
+    configKeyOverride: String? = nil
 ) -> some WidgetConfiguration {
-    StaticConfiguration(kind: kind, provider: Provider(mode: mode, title: title)) { entry in
+    StaticConfiguration(
+        kind: kind,
+        provider: Provider(
+            mode: mode,
+            title: title,
+            configKeyOverride: configKeyOverride,
+            hideLockscreenTitle: hideLockscreenTitle
+        )
+    ) { entry in
         if #available(iOSApplicationExtension 17.0, *) {
             DayMasterWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
@@ -441,6 +458,50 @@ struct JiosAllWidget: Widget {
             title: "全部待办",
             description: "显示全部未完成日程",
             mode: .all
+        )
+    }
+}
+
+private func makeLockscreenConfiguration(
+    kind: String,
+    title: String,
+    description: String,
+    mode: WidgetMode,
+    configKeyOverride: String? = nil
+) -> some WidgetConfiguration {
+    StaticConfiguration(
+        kind: kind,
+        provider: Provider(
+            mode: mode,
+            title: title,
+            configKeyOverride: configKeyOverride,
+            hideLockscreenTitle: true
+        )
+    ) { entry in
+        if #available(iOSApplicationExtension 17.0, *) {
+            DayMasterWidgetEntryView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        } else {
+            DayMasterWidgetEntryView(entry: entry)
+        }
+    }
+    .configurationDisplayName(title)
+    .description(description)
+    .supportedFamilies([
+        .accessoryCircular,
+        .accessoryRectangular,
+        .accessoryInline,
+    ])
+}
+
+struct JiosLockSelectedWidget: Widget {
+    var body: some WidgetConfiguration {
+        makeLockscreenConfiguration(
+            kind: "DayMasterLockSelectedWidget",
+            title: "锁屏选定任务",
+            description: "锁屏显示手动选择任务",
+            mode: .selected,
+            configKeyOverride: "widget_config_lock_selected"
         )
     }
 }

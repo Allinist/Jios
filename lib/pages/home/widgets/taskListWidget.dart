@@ -159,6 +159,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                 notifyAtEnd: task.notifyAtEnd,
                 notifyBeforeEndMinutes: task.notifyBeforeEndMinutes,
                 widgetDisplayScopes: task.widgetDisplayScopes,
+                widgetInfoType: task.widgetInfoType,
               );
 
               await TaskDao().update(updated);

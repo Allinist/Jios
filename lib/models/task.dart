@@ -20,6 +20,7 @@ class Task {
   int? notifyAtEnd;
   int? notifyBeforeEndMinutes;
   String? widgetDisplayScopes;
+  String? widgetInfoType;
 
   Task({
     this.id,
@@ -43,6 +44,7 @@ class Task {
     this.notifyAtEnd,
     this.notifyBeforeEndMinutes,
     this.widgetDisplayScopes,
+    this.widgetInfoType,
   });
 
   Map<String, dynamic> toMap() {
@@ -68,6 +70,7 @@ class Task {
       'notify_at_end': notifyAtEnd,
       'notify_before_end_minutes': notifyBeforeEndMinutes,
       'widget_display_scopes': widgetDisplayScopes,
+      'widget_info_type': widgetInfoType,
     };
   }
 
@@ -94,6 +97,7 @@ class Task {
       notifyAtEnd: map['notify_at_end'],
       notifyBeforeEndMinutes: map['notify_before_end_minutes'],
       widgetDisplayScopes: map['widget_display_scopes'],
+      widgetInfoType: map['widget_info_type'],
     );
   }
 }

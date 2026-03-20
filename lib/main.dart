@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'pages/main/mainNavigationPage.dart';
 import 'pages/task/createTaskPage.dart';
 import 'services/notificationService.dart';
+import 'services/widgetServices.dart';
 
 const MethodChannel _widgetClickChannel = MethodChannel('widget_click');
 
@@ -15,10 +16,12 @@ Future<void> _initWidgetClickChannel() async {
   });
 }
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _initWidgetClickChannel();
+  await _initWidgetClickChannel();
   NotificationService.requestPermission();
+  await WidgetService.syncWidgetData();
+  await WidgetService.refreshWidget();
   runApp(const DayMasterApp());
 }
 

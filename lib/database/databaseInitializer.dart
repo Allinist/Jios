@@ -34,7 +34,8 @@ CREATE TABLE tasks (
     notify_before_start_minutes INTEGER,
     notify_at_end INTEGER,
     notify_before_end_minutes INTEGER,
-    widget_display_scopes TEXT
+    widget_display_scopes TEXT,
+    widget_info_type TEXT
 );
 ''');
 
@@ -140,6 +141,15 @@ CREATE TABLE widget_cache (
         db: db,
         table: 'tasks',
         column: 'widget_display_scopes',
+        definition: 'TEXT',
+      );
+    }
+
+    if (oldVersion < 6) {
+      await _addColumnIfNotExists(
+        db: db,
+        table: 'tasks',
+        column: 'widget_info_type',
         definition: 'TEXT',
       );
     }
