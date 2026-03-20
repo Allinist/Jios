@@ -236,6 +236,7 @@ class _TaskBookPageState extends State<TaskBookPage> {
                 notifyBeforeStartMinutes: task.notifyBeforeStartMinutes,
                 notifyAtEnd: task.notifyAtEnd,
                 notifyBeforeEndMinutes: task.notifyBeforeEndMinutes,
+                widgetDisplayScopes: task.widgetDisplayScopes,
               );
 
               await _taskDao.update(updated);

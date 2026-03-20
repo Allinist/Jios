@@ -16,7 +16,8 @@ private struct WidgetTask: Decodable {
     let status: String?
     let completed: Bool
     let isToday: Bool
-    let time: String
+    let timelineLines: [String]
+    let widgetScopes: [String]
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -25,7 +26,20 @@ private struct WidgetTask: Decodable {
         case status
         case completed
         case isToday = "is_today"
-        case time
+        case timelineLines = "timeline_lines"
+        case widgetScopes = "widget_scopes"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(Int.self, forKey: .id)
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        taskBookId = try container.decodeIfPresent(Int.self, forKey: .taskBookId)
+        status = try container.decodeIfPresent(String.self, forKey: .status)
+        completed = try container.decodeIfPresent(Bool.self, forKey: .completed) ?? false
+        isToday = try container.decodeIfPresent(Bool.self, forKey: .isToday) ?? false
+        timelineLines = try container.decodeIfPresent([String].self, forKey: .timelineLines) ?? []
+        widgetScopes = try container.decodeIfPresent([String].self, forKey: .widgetScopes) ?? []
     }
 }
 
@@ -173,13 +187,16 @@ private struct DayMasterWidgetEntryView: View {
     }
 
     private var displayTasks: [DisplayTask] {
-        Array(entry.tasks.prefix(8).enumerated()).map { index, task in
+        let filtered = entry.tasks.filter { task in
+            isTaskVisible(task: task, for: family)
+        }
+        return Array(filtered.prefix(14).enumerated()).map { index, task in
             DisplayTask(id: "\(task.id ?? -1)-\(index)-\(task.title)", task: task)
         }
     }
 
     var smallView: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(entry.title)
                 .font(.caption)
                 .fontWeight(.semibold)
@@ -188,14 +205,14 @@ private struct DayMasterWidgetEntryView: View {
                 Text("无任务")
                     .font(.caption2)
             } else {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(displayTasks.prefix(3)) { item in
-                        taskCell(item.task)
+                VStack(alignment: .leading, spacing: 1) {
+                    ForEach(displayTasks.prefix(4)) { item in
+                        smallTaskCell(item.task)
                     }
                 }
             }
         }
-        .padding()
+        .padding(6)
     }
 
     var mediumView: some View {
@@ -208,10 +225,10 @@ private struct DayMasterWidgetEntryView: View {
                 Text("无任务")
                     .font(.caption2)
             } else {
-                twoColumnGrid(items: Array(displayTasks.prefix(4)))
+                twoColumnGrid(items: Array(displayTasks.prefix(6)))
             }
         }
-        .padding()
+        .padding(6)
     }
 
     var largeView: some View {
@@ -224,12 +241,12 @@ private struct DayMasterWidgetEntryView: View {
                 Text("无任务")
                     .font(.caption2)
             } else {
-                twoColumnGrid(items: Array(displayTasks.prefix(8)))
+                twoColumnGrid(items: Array(displayTasks.prefix(14)))
             }
 
             Spacer()
         }
-        .padding()
+        .padding(6)
     }
 
     var inlineView: some View {
@@ -258,9 +275,17 @@ private struct DayMasterWidgetEntryView: View {
                 .fontWeight(.semibold)
 
             if let first = entry.tasks.first {
-                Text(first.title)
-                    .font(.caption2)
-                    .lineLimit(2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("• \(first.title)")
+                        .font(.caption2)
+                        .lineLimit(1)
+                    if !first.timelineLines.isEmpty {
+                        Text(first.timelineLines.prefix(2).joined(separator: " · "))
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                    }
+                }
             } else {
                 Text("无任务")
                     .font(.caption2)
@@ -275,7 +300,7 @@ private struct DayMasterWidgetEntryView: View {
                 GridItem(.flexible(), alignment: .topLeading),
                 GridItem(.flexible(), alignment: .topLeading),
             ],
-            spacing: 6
+            spacing: 4
         ) {
             ForEach(items) { item in
                 taskCell(item.task)
@@ -290,14 +315,41 @@ private struct DayMasterWidgetEntryView: View {
                 .font(.caption2)
                 .lineLimit(1)
 
-            if !task.time.isEmpty {
-                Text(task.time)
+            if !task.timelineLines.isEmpty {
+                Text(task.timelineLines.prefix(2).joined(separator: " · "))
                     .font(.caption2)
                     .foregroundColor(.gray)
                     .lineLimit(1)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private func smallTaskCell(_ task: WidgetTask) -> some View {
+        Text("• \(task.title)")
+            .font(.caption2)
+            .lineLimit(1)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func isTaskVisible(task: WidgetTask, for family: WidgetFamily) -> Bool {
+        let scopes = task.widgetScopes
+        if scopes.isEmpty {
+            return true
+        }
+        switch family {
+        case .systemSmall:
+            return scopes.contains("small")
+        case .systemMedium:
+            return scopes.contains("medium")
+        case .systemLarge:
+            return scopes.contains("large")
+        case .accessoryInline, .accessoryCircular, .accessoryRectangular:
+            return scopes.contains("lockscreen")
+        default:
+            return true
+        }
     }
 }
 

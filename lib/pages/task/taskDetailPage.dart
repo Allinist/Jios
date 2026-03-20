@@ -27,6 +27,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   static const int _displayDuration = 4;
   static const int _displaySinceLast = 8;
   static const int _displayUntilNext = 16;
+  static const List<String> _allWidgetScopes = ['small', 'medium', 'large', 'lockscreen'];
 
   static const List<String> _allGranularity = ['year', 'month', 'day', 'hour', 'minute'];
 
@@ -50,6 +51,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   int? _notifyBeforeStartMinutes;
   bool _notifyAtEnd = false;
   int? _notifyBeforeEndMinutes;
+  List<String> _widgetDisplayScopes = ['small', 'medium', 'large', 'lockscreen'];
 
   int _timelineDisplayMask = _displayElapsed | _displayRemaining | _displayDuration;
   List<String> _timelineGranularity = ['day', 'hour'];
@@ -93,6 +95,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     _notifyBeforeStartMinutes = task.notifyBeforeStartMinutes;
     _notifyAtEnd = task.notifyAtEnd == 1;
     _notifyBeforeEndMinutes = task.notifyBeforeEndMinutes;
+    _widgetDisplayScopes = _parseWidgetScopes(task.widgetDisplayScopes);
 
     final granularityText = task.timelineGranularity;
     if (granularityText != null && granularityText.trim().isNotEmpty) {
@@ -502,6 +505,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       notifyBeforeStartMinutes: _notifyBeforeStartMinutes,
       notifyAtEnd: _notifyAtEnd ? 1 : 0,
       notifyBeforeEndMinutes: _notifyBeforeEndMinutes,
+      widgetDisplayScopes: _widgetDisplayScopes.join(','),
       createdAt: widget.task?.createdAt ?? now,
       updatedAt: now,
     );
@@ -681,6 +685,58 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     });
   }
 
+  Future<void> _editWidgetDisplayScopes() async {
+    final selected = {..._widgetDisplayScopes};
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('组件显示范围'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final scope in _allWidgetScopes)
+                CheckboxListTile(
+                  value: selected.contains(scope),
+                  title: Text(_widgetScopeLabel(scope)),
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      if (value == true) {
+                        selected.add(scope);
+                      } else {
+                        selected.remove(scope);
+                        if (selected.isEmpty) {
+                          selected.add(scope);
+                        }
+                      }
+                    });
+                  },
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (ok != true) return;
+
+    setState(() {
+      _widgetDisplayScopes = selected.toList();
+    });
+  }
+
   bool _hasDisplayFlag(int flag) {
     return (_timelineDisplayMask & flag) != 0;
   }
@@ -803,6 +859,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             subtitle: Text(_reminderSummary()),
             trailing: const Icon(Icons.chevron_right),
             onTap: _editReminder,
+          ),
+          ListTile(
+            title: const Text('组件显示范围'),
+            subtitle: Text(_widgetScopesSummary()),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _editWidgetDisplayScopes,
           ),
           ListTile(
             title: const Text('重复规则'),
@@ -942,6 +1004,45 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   }) {
     final total = days * 24 * 60 + hours * 60 + minutes;
     return total <= 0 ? null : total;
+  }
+
+  List<String> _parseWidgetScopes(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return List<String>.from(_allWidgetScopes);
+    }
+
+    final list = raw
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => _allWidgetScopes.contains(e))
+        .toList();
+
+    if (list.isEmpty) {
+      return List<String>.from(_allWidgetScopes);
+    }
+    return list;
+  }
+
+  String _widgetScopeLabel(String scope) {
+    switch (scope) {
+      case 'small':
+        return '小组件(小号)';
+      case 'medium':
+        return '小组件(中号)';
+      case 'large':
+        return '小组件(大号)';
+      case 'lockscreen':
+        return '锁屏组件';
+      default:
+        return scope;
+    }
+  }
+
+  String _widgetScopesSummary() {
+    if (_widgetDisplayScopes.length == _allWidgetScopes.length) {
+      return '全部组件';
+    }
+    return _widgetDisplayScopes.map(_widgetScopeLabel).join('、');
   }
 
   String _reminderSummary() {
