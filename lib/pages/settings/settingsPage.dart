@@ -23,6 +23,7 @@ class _SettingsPageState extends State<SettingsPage> {
   List<int> _configuredWidgetTaskIds = [];
   int? _bookWidgetTaskBookId;
   List<int> _selectedWidgetTaskIds = [];
+  List<int> _lockSelectedWidgetTaskIds = [];
 
   List<TaskBook> _books = [];
   List<Task> _tasks = [];
@@ -39,6 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final configured = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeConfigured);
     final book = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeBook);
     final selected = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeSelected);
+    final lockSelected = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeLockSelected);
 
     if (!mounted) return;
 
@@ -50,6 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _configuredWidgetTaskIds = (configured['task_ids'] as List? ?? []).whereType<int>().toList();
       _bookWidgetTaskBookId = book['task_book_id'] as int?;
       _selectedWidgetTaskIds = (selected['task_ids'] as List? ?? []).whereType<int>().toList();
+      _lockSelectedWidgetTaskIds = (lockSelected['task_ids'] as List? ?? []).whereType<int>().toList();
     });
   }
 
@@ -98,6 +101,22 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('选定日程小组件配置已更新')),
+    );
+  }
+
+  Future<void> _saveLockSelectedWidgetConfig() async {
+    await WidgetService.saveWidgetConfig(
+      scope: WidgetService.scopeLockSelected,
+      mode: 'selected',
+      taskBookId: null,
+      taskIds: _lockSelectedWidgetTaskIds,
+    );
+    await WidgetService.syncWidgetData();
+    await WidgetService.refreshWidget();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('锁屏选定任务小组件配置已更新')),
     );
   }
 
@@ -217,6 +236,24 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
+          ExpansionTile(
+            title: const Text('锁屏选定任务小组件配置'),
+            subtitle: const Text('对应“锁屏选定任务”小组件'),
+            childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _pickWidgetTasks(configured: false, lockSelected: true),
+                icon: const Icon(Icons.checklist),
+                label: Text('已选择 ${_lockSelectedWidgetTaskIds.length} 个任务，点击修改'),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: _saveLockSelectedWidgetConfig,
+                icon: const Icon(Icons.save),
+                label: const Text('保存锁屏选定任务配置'),
+              ),
+            ],
+          ),
           ListTile(
             leading: const Icon(Icons.upload_file),
             title: const Text('导出全部数据 (JSON)'),
@@ -239,8 +276,12 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<void> _pickWidgetTasks({required bool configured}) async {
-    final selected = configured ? {..._configuredWidgetTaskIds} : {..._selectedWidgetTaskIds};
+  Future<void> _pickWidgetTasks({required bool configured, bool lockSelected = false}) async {
+    final selected = lockSelected
+        ? {..._lockSelectedWidgetTaskIds}
+        : configured
+            ? {..._configuredWidgetTaskIds}
+            : {..._selectedWidgetTaskIds};
 
     final ok = await showDialog<bool>(
       context: context,
@@ -287,7 +328,9 @@ class _SettingsPageState extends State<SettingsPage> {
     if (ok != true) return;
 
     setState(() {
-      if (configured) {
+      if (lockSelected) {
+        _lockSelectedWidgetTaskIds = selected.toList();
+      } else if (configured) {
         _configuredWidgetTaskIds = selected.toList();
       } else {
         _selectedWidgetTaskIds = selected.toList();

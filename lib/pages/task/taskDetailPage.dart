@@ -28,6 +28,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   static const int _displaySinceLast = 8;
   static const int _displayUntilNext = 16;
   static const List<String> _allWidgetScopes = ['small', 'medium', 'large', 'lockscreen'];
+  static const List<String> _allWidgetInfoTypes = [
+    'auto',
+    'none',
+    'elapsed',
+    'remaining',
+    'duration',
+    'since_last',
+    'until_next',
+  ];
 
   static const List<String> _allGranularity = ['year', 'month', 'day', 'hour', 'minute'];
 
@@ -52,9 +61,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   bool _notifyAtEnd = false;
   int? _notifyBeforeEndMinutes;
   List<String> _widgetDisplayScopes = ['small', 'medium', 'large', 'lockscreen'];
+  String _widgetInfoType = 'auto';
 
-  int _timelineDisplayMask = _displayElapsed | _displayRemaining | _displayDuration;
-  List<String> _timelineGranularity = ['day', 'hour'];
+  int _timelineDisplayMask = 0;
+  List<String> _timelineGranularity = ['day'];
 
   RepeatRule? _repeatRule;
   List<TaskBook> _books = [];
@@ -63,6 +73,9 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   void initState() {
     super.initState();
     _isCreate = widget.task == null;
+    if (_isCreate) {
+      _startDate = DateTime.now();
+    }
     _initFromTask();
     _loadTaskBooks();
     _loadRepeatRule();
@@ -96,6 +109,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     _notifyAtEnd = task.notifyAtEnd == 1;
     _notifyBeforeEndMinutes = task.notifyBeforeEndMinutes;
     _widgetDisplayScopes = _parseWidgetScopes(task.widgetDisplayScopes);
+    _widgetInfoType = _parseWidgetInfoType(task.widgetInfoType);
 
     final granularityText = task.timelineGranularity;
     if (granularityText != null && granularityText.trim().isNotEmpty) {
@@ -506,6 +520,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       notifyAtEnd: _notifyAtEnd ? 1 : 0,
       notifyBeforeEndMinutes: _notifyBeforeEndMinutes,
       widgetDisplayScopes: _widgetDisplayScopes.join(','),
+      widgetInfoType: _widgetInfoType,
       createdAt: widget.task?.createdAt ?? now,
       updatedAt: now,
     );
@@ -520,6 +535,58 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     await NotificationService.syncTaskNotifications(task);
 
     if (!mounted) return;
+    Navigator.pop(context, true);
+  }
+
+  Future<void> _duplicateTask() async {
+    if (_title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('任务名称不能为空')),
+      );
+      return;
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    int? copiedRepeatRuleId;
+    if (_repeatRule != null) {
+      final copiedRule = _cloneRepeatRule(_repeatRule!);
+      copiedRepeatRuleId = await _repeatRuleDao.insert(copiedRule);
+    }
+
+    final duplicated = Task(
+      title: _title,
+      description: _description.isEmpty ? null : _description,
+      taskBookId: _taskBookId,
+      taskType: widget.task?.taskType,
+      priority: widget.task?.priority,
+      status: 'active',
+      startDate: _startDate?.millisecondsSinceEpoch,
+      endDate: _endDate?.millisecondsSinceEpoch,
+      expectedDuration: _expectedDurationMinutes,
+      repeatRuleId: copiedRepeatRuleId,
+      timelineDisplayMask: _timelineDisplayMask,
+      timelineGranularity: _timelineGranularity.join(','),
+      notifyAtStart: _notifyAtStart ? 1 : 0,
+      notifyBeforeStartMinutes: _notifyBeforeStartMinutes,
+      notifyAtEnd: _notifyAtEnd ? 1 : 0,
+      notifyBeforeEndMinutes: _notifyBeforeEndMinutes,
+      widgetDisplayScopes: _widgetDisplayScopes.join(','),
+      widgetInfoType: _widgetInfoType,
+      color: _color,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final id = await _taskDao.insert(duplicated);
+    duplicated.id = id;
+
+    await NotificationService.syncTaskNotifications(duplicated);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('已复制为新任务')),
+    );
     Navigator.pop(context, true);
   }
 
@@ -737,6 +804,30 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     });
   }
 
+  Future<void> _editWidgetInfoType() async {
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (final type in _allWidgetInfoTypes)
+              ListTile(
+                title: Text(_widgetInfoTypeLabel(type)),
+                trailing: _widgetInfoType == type ? const Icon(Icons.check) : null,
+                onTap: () => Navigator.pop(context, type),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (selected == null) return;
+    setState(() {
+      _widgetInfoType = selected;
+    });
+  }
+
   bool _hasDisplayFlag(int flag) {
     return (_timelineDisplayMask & flag) != 0;
   }
@@ -780,6 +871,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       appBar: AppBar(
         title: Text(_isCreate ? '创建任务' : '任务详情'),
         actions: [
+          if (!_isCreate)
+            IconButton(
+              icon: const Icon(Icons.copy_outlined),
+              tooltip: '复制任务',
+              onPressed: _duplicateTask,
+            ),
           if (!_isCreate)
             IconButton(
               icon: const Icon(Icons.delete_outline),
@@ -865,6 +962,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             subtitle: Text(_widgetScopesSummary()),
             trailing: const Icon(Icons.chevron_right),
             onTap: _editWidgetDisplayScopes,
+          ),
+          ListTile(
+            title: const Text('组件右侧信息'),
+            subtitle: Text(_widgetInfoTypeLabel(_widgetInfoType)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _editWidgetInfoType,
           ),
           ListTile(
             title: const Text('重复规则'),
@@ -1038,6 +1141,34 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     }
   }
 
+  String _parseWidgetInfoType(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return 'auto';
+    }
+    return _allWidgetInfoTypes.contains(raw) ? raw : 'auto';
+  }
+
+  String _widgetInfoTypeLabel(String type) {
+    switch (type) {
+      case 'auto':
+        return '自动（按日程显示项）';
+      case 'none':
+        return '不显示';
+      case 'elapsed':
+        return '已开始';
+      case 'remaining':
+        return '剩余';
+      case 'duration':
+        return '持续';
+      case 'since_last':
+        return '距上次';
+      case 'until_next':
+        return '距下次';
+      default:
+        return type;
+    }
+  }
+
   String _widgetScopesSummary() {
     if (_widgetDisplayScopes.length == _allWidgetScopes.length) {
       return '全部组件';
@@ -1086,5 +1217,11 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       default:
         return rule.repeatType!;
     }
+  }
+
+  RepeatRule _cloneRepeatRule(RepeatRule rule) {
+    final map = Map<String, dynamic>.from(rule.toMap());
+    map['id'] = null;
+    return RepeatRule.fromMap(map);
   }
 }

@@ -27,7 +27,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: DatabaseInitializer.createTables,
       onUpgrade: DatabaseInitializer.upgradeTables,
     );

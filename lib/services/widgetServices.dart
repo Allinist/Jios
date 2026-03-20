@@ -27,6 +27,7 @@ class WidgetService {
   static const String scopeConfigured = 'configured';
   static const String scopeBook = 'book';
   static const String scopeSelected = 'selected';
+  static const String scopeLockSelected = 'lock_selected';
 
   static Future<void> syncWidgetData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -50,6 +51,7 @@ class WidgetService {
       final rule = task.repeatRuleId == null ? null : ruleMap[task.repeatRuleId!];
       final isToday = TaskScheduler.shouldShowTask(task, rule, today);
       final timelineLines = _buildTimelineLines(task, rule, today);
+      final widgetInfo = _pickWidgetInfo(task: task, rule: rule, now: today, lines: timelineLines);
       final scopes = _parseWidgetScopes(task.widgetDisplayScopes);
 
       return {
@@ -60,6 +62,7 @@ class WidgetService {
         'completed': task.status == 'completed',
         'is_today': isToday,
         'timeline_lines': timelineLines,
+        'widget_info': widgetInfo,
         'widget_scopes': scopes,
       };
     }).toList();
@@ -124,7 +127,7 @@ class WidgetService {
   }
 
   static List<String> _parseGranularity(String? text) {
-    final defaults = ['day', 'hour'];
+    final defaults = ['day'];
     if (text == null || text.trim().isEmpty) {
       return defaults;
     }
@@ -205,6 +208,110 @@ class WidgetService {
         .where((e) => all.contains(e))
         .toList();
     return list.isEmpty ? all : list;
+  }
+
+  static String _pickWidgetInfo({
+    required Task task,
+    required RepeatRule? rule,
+    required DateTime now,
+    required List<String> lines,
+  }) {
+    final type = (task.widgetInfoType == null || task.widgetInfoType!.trim().isEmpty)
+        ? 'auto'
+        : task.widgetInfoType!;
+
+    if (type == 'none') {
+      return '';
+    }
+
+    final granularity = _parseGranularity(task.timelineGranularity);
+    final mask = task.timelineDisplayMask ?? (_displayElapsed | _displayRemaining | _displayDuration);
+
+    String? elapsed() {
+      if (task.startDate == null) return null;
+      final start = DateTime.fromMillisecondsSinceEpoch(task.startDate!);
+      if (!now.isAfter(start)) return null;
+      return '已开始${_formatDuration(now.difference(start), granularity)}';
+    }
+
+    String? remaining() {
+      if (task.endDate == null) return null;
+      final end = DateTime.fromMillisecondsSinceEpoch(task.endDate!);
+      if (!end.isAfter(now)) return null;
+      return '剩余${_formatDuration(end.difference(now), granularity)}';
+    }
+
+    String? duration() {
+      if (task.expectedDuration == null || task.expectedDuration! <= 0) return null;
+      return '持续${_formatHoursMinutes(task.expectedDuration!)}';
+    }
+
+    String? sinceLast() {
+      if (rule == null) return null;
+      final previous = _findPreviousOccurrence(task, rule, now);
+      if (previous == null) return null;
+      return '距上次${_formatDuration(now.difference(previous), granularity)}';
+    }
+
+    String? untilNext() {
+      if (rule == null) return null;
+      final next = _findNextOccurrence(task, rule, now);
+      if (next == null || !next.isAfter(now)) return null;
+      return '距下次${_formatDuration(next.difference(now), granularity)}';
+    }
+
+    switch (type) {
+      case 'elapsed':
+        return elapsed() ?? '';
+      case 'remaining':
+        return remaining() ?? '';
+      case 'duration':
+        return duration() ?? '';
+      case 'since_last':
+        return sinceLast() ?? '';
+      case 'until_next':
+        return untilNext() ?? '';
+      default:
+        // Auto mode still tries to show one useful line even when timeline
+        // display options are left empty in task detail.
+        if (mask == 0) {
+          final candidates = <String?>[
+            elapsed(),
+            remaining(),
+            duration(),
+            sinceLast(),
+            untilNext(),
+          ];
+          for (final text in candidates) {
+            if (text != null && text.isNotEmpty) {
+              return text;
+            }
+          }
+          return lines.isEmpty ? '' : lines.first;
+        }
+
+        if ((mask & _displayElapsed) != 0) {
+          final text = elapsed();
+          if (text != null) return text;
+        }
+        if ((mask & _displayRemaining) != 0) {
+          final text = remaining();
+          if (text != null) return text;
+        }
+        if ((mask & _displayDuration) != 0) {
+          final text = duration();
+          if (text != null) return text;
+        }
+        if ((mask & _displaySinceLast) != 0) {
+          final text = sinceLast();
+          if (text != null) return text;
+        }
+        if ((mask & _displayUntilNext) != 0) {
+          final text = untilNext();
+          if (text != null) return text;
+        }
+        return lines.isEmpty ? '' : lines.first;
+    }
   }
 
   static Future<void> saveWidgetConfig({

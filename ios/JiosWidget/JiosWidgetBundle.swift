@@ -16,5 +16,6 @@ struct JiosWidgetBundle: WidgetBundle {
         JiosTaskBookWidget()
         JiosSelectedWidget()
         JiosAllWidget()
+        JiosLockSelectedWidget()
     }
 }
