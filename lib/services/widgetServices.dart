@@ -23,11 +23,18 @@ class WidgetService {
   static const String _tasksKey = 'widget_tasks';
   static const String _legacyConfigKey = 'widget_config';
   static const String _configPrefix = 'widget_config_';
+  static const String _appearanceKey = 'widget_appearance_theme';
 
   static const String scopeConfigured = 'configured';
   static const String scopeBook = 'book';
   static const String scopeSelected = 'selected';
   static const String scopeLockSelected = 'lock_selected';
+
+  static const String widgetThemeMistLight = 'mist_light';
+  static const String widgetThemeSlateBlue = 'slate_blue';
+  static const String widgetThemeWarmSand = 'warm_sand';
+  static const String widgetThemeNightGraphite = 'night_graphite';
+  static const String widgetThemeAuto = 'auto';
 
   static Future<void> syncWidgetData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -377,6 +384,21 @@ class WidgetService {
     try {
       await platform.invokeMethod('reload');
     } catch (_) {}
+  }
+
+  static Future<void> saveWidgetAppearanceTheme(String theme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_appearanceKey, theme);
+    await _saveSharedStringForIOS(key: _appearanceKey, value: theme);
+  }
+
+  static Future<String> loadWidgetAppearanceTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final text = prefs.getString(_appearanceKey);
+    if (text == null || text.trim().isEmpty) {
+      return widgetThemeAuto;
+    }
+    return text;
   }
 
   static String _configKey(String scope) {
