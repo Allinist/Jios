@@ -403,7 +403,8 @@ private struct DayMasterWidgetEntryView: View {
 
             Spacer(minLength: 0)
         }
-        .padding(5)
+        .padding(.horizontal, 2.5)
+        .padding(.vertical, 5)
     }
 
     private var enhancedSmall: some View {
@@ -416,21 +417,11 @@ private struct DayMasterWidgetEntryView: View {
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
-                    VStack(spacing: 0) {
-                        ForEach(Array(visibleTasks.prefix(6).enumerated()), id: \.element.id) { index, item in
-                            enhancedRow(item.task, compact: true)
-                            if index < min(visibleTasks.count, 6) - 1 {
-                                Divider().overlay(palette.divider)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(card(fill: palette.card, radius: 13))
+                    enhancedTaskList(limit: 6, compact: true, radius: 13)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 14)
+            .padding(.horizontal, 10)
+            .padding(.top, 16)
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -446,30 +437,17 @@ private struct DayMasterWidgetEntryView: View {
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
-                    LazyVGrid(
-                        columns: [
-                            GridItem(.flexible(), spacing: 6),
-                            GridItem(.flexible(), spacing: 6)
-                        ],
-                        spacing: 6
-                    ) {
-                        ForEach(visibleTasks.prefix(10)) { item in
-                            enhancedTaskCard(item.task)
-                        }
-                    }
+                    enhancedTaskList(limit: 8, compact: false, radius: 14)
                 }
             }
             .padding(.horizontal, 10)
-            .padding(.top, 14)
+            .padding(.top, 16)
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
 
     private var enhancedLarge: some View {
-        let focusTasks = Array(visibleTasks.prefix(4))
-        let queueTasks = Array(visibleTasks.dropFirst(4).prefix(10))
-
         return ZStack {
             WidgetBackground(palette: palette)
 
@@ -485,7 +463,7 @@ private struct DayMasterWidgetEntryView: View {
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(palette.primary)
 
-                        Text("\(visibleTasks.count) Tasks")
+                        Text("\(visibleTasks.count) 项任务")
                             .font(.caption)
                             .foregroundStyle(palette.secondary)
                     }
@@ -500,58 +478,16 @@ private struct DayMasterWidgetEntryView: View {
                         .foregroundStyle(palette.primary)
                 }
 
-                sectionTitle("Focus")
-                if focusTasks.isEmpty {
+                if visibleTasks.isEmpty {
                     emptyState
                 } else {
-                    VStack(spacing: 7) {
-                        ForEach(focusTasks) { item in
-                            HStack(alignment: .top, spacing: 10) {
-                                Capsule()
-                                    .fill(accentColor(for: item.task))
-                                    .frame(width: 4, height: 24)
-
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(item.task.title)
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(palette.primary)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.85)
-
-                                    Text(subtitle(for: item.task))
-                                        .font(.caption)
-                                        .foregroundStyle(palette.secondary)
-                                        .lineLimit(1)
-                                }
-
-                                Spacer(minLength: 0)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 8)
-                            .background(card(fill: palette.strongCard, radius: 14))
-                        }
-                    }
-                }
-
-                if !queueTasks.isEmpty {
-                    sectionTitle("Queue")
-                    LazyVGrid(
-                        columns: [
-                            GridItem(.flexible(), spacing: 6),
-                            GridItem(.flexible(), spacing: 6)
-                        ],
-                        spacing: 6
-                    ) {
-                        ForEach(queueTasks) { item in
-                            enhancedTaskCard(item.task)
-                        }
-                    }
+                    enhancedTaskList(limit: 12, compact: false, radius: 14)
                 }
 
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 10)
-            .padding(.top, 14)
+            .padding(.top, 16)
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -652,7 +588,7 @@ private struct DayMasterWidgetEntryView: View {
                 Text("\(visibleTasks.count)")
                     .font(compact ? .headline.weight(.semibold) : .title3.weight(.semibold))
                     .foregroundStyle(palette.primary)
-                Text("Tasks")
+                Text("任务")
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
             }
@@ -713,32 +649,18 @@ private struct DayMasterWidgetEntryView: View {
         .padding(.vertical, compact ? 4 : 5)
     }
 
-    private func enhancedTaskCard(_ task: WidgetTask) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Capsule()
-                    .fill(accentColor(for: task))
-                    .frame(width: 4, height: 16)
-
-                Text(task.title)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(palette.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.84)
-
-                Spacer(minLength: 0)
+    private func enhancedTaskList(limit: Int, compact: Bool, radius: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(visibleTasks.prefix(limit).enumerated()), id: \.element.id) { index, item in
+                enhancedRow(item.task, compact: compact)
+                if index < min(visibleTasks.count, limit) - 1 {
+                    Divider().overlay(palette.divider)
+                }
             }
-
-            Text(subtitle(for: task))
-                .font(.caption2)
-                .foregroundStyle(palette.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.84)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 9)
-        .padding(.vertical, 7)
-        .background(card(fill: palette.strongCard, radius: 13))
+        .padding(.horizontal, compact ? 8 : 10)
+        .padding(.vertical, compact ? 4 : 6)
+        .background(card(fill: compact ? palette.card : palette.strongCard, radius: radius))
     }
 
     private func subtitle(for task: WidgetTask) -> String {
@@ -794,8 +716,8 @@ private struct DayMasterWidgetEntryView: View {
 
     private var dateText: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "MMM d - EEE"
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.dateFormat = "M月d日 EEE"
         return formatter.string(from: entry.date)
     }
 }

@@ -43,6 +43,34 @@ class WidgetService {
     final ruleDao = RepeatRuleDao();
 
     final tasks = await taskDao.getAll();
+    final sortedTasks = [...tasks]..sort((a, b) {
+      final aOrder = a.manualOrder;
+      final bOrder = b.manualOrder;
+
+      if (aOrder != null && bOrder != null && aOrder != bOrder) {
+        return aOrder.compareTo(bOrder);
+      }
+      if (aOrder != null && bOrder == null) {
+        return -1;
+      }
+      if (aOrder == null && bOrder != null) {
+        return 1;
+      }
+
+      final aCompleted = a.status == 'completed';
+      final bCompleted = b.status == 'completed';
+      if (aCompleted != bCompleted) {
+        return aCompleted ? 1 : -1;
+      }
+
+      final aEnd = a.endDate ?? 9223372036854775807;
+      final bEnd = b.endDate ?? 9223372036854775807;
+      if (aEnd != bEnd) {
+        return aEnd.compareTo(bEnd);
+      }
+
+      return a.createdAt.compareTo(b.createdAt);
+    });
     final books = await taskBookDao.getAll();
 
     final Map<int, RepeatRule?> ruleMap = {};
@@ -54,7 +82,7 @@ class WidgetService {
 
     final today = DateTime.now();
 
-    final data = tasks.map((task) {
+    final data = sortedTasks.map((task) {
       final rule = task.repeatRuleId == null ? null : ruleMap[task.repeatRuleId!];
       final isToday = TaskScheduler.shouldShowTask(task, rule, today);
       final timelineLines = _buildTimelineLines(task, rule, today);
