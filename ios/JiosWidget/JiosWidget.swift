@@ -415,6 +415,7 @@ private struct DayMasterWidgetEntryView: View {
     private var enhancedSmall: some View {
         ZStack {
             WidgetBackground(palette: palette)
+                .scaleEffect(1.05, anchor: .center)
             VStack(alignment: .leading, spacing: 6) {
                 header(compact: true)
                 if visibleTasks.isEmpty {
@@ -435,6 +436,7 @@ private struct DayMasterWidgetEntryView: View {
     private var enhancedMedium: some View {
         ZStack {
             WidgetBackground(palette: palette)
+                .scaleEffect(1.05, anchor: .center)
             VStack(alignment: .leading, spacing: 8) {
                 header(compact: false)
                 if visibleTasks.isEmpty {
@@ -448,7 +450,7 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .scaleEffect(x: 1.12, y: 1.08, anchor: .top)
+        .scaleEffect(x: 1.10, y: 1.08, anchor: .top)
         .offset(y: 12)
     }
 
