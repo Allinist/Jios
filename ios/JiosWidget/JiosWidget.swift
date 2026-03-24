@@ -20,6 +20,7 @@ private enum WidgetAppearanceTheme: String {
     case slateBlue = "slate_blue"
     case warmSand = "warm_sand"
     case nightGraphite = "night_graphite"
+    case roseBlush = "rose_blush"
 }
 
 private struct WidgetTask: Decodable {
@@ -256,6 +257,18 @@ private struct Palette {
                 accent: Color(red: 0.67, green: 0.41, blue: 0.22),
                 divider: Color.white.opacity(0.30)
             )
+        case .roseBlush:
+            return Palette(
+                top: Color(red: 0.99, green: 0.91, blue: 0.95),
+                bottom: Color(red: 0.94, green: 0.75, blue: 0.84),
+                orb: Color(red: 0.90, green: 0.47, blue: 0.67),
+                card: Color.white.opacity(0.32),
+                strongCard: Color.white.opacity(0.46),
+                primary: Color(red: 0.32, green: 0.14, blue: 0.22),
+                secondary: Color(red: 0.50, green: 0.24, blue: 0.35),
+                accent: Color(red: 0.80, green: 0.28, blue: 0.51),
+                divider: Color.white.opacity(0.34)
+            )
         case .nightGraphite, .auto:
             return Palette(
                 top: Color(red: 0.17, green: 0.20, blue: 0.25),
@@ -410,7 +423,7 @@ private struct DayMasterWidgetEntryView: View {
                     enhancedTaskList(limit: 4, compact: true, radius: 13)
                 }
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 8)
             .padding(.top, 16)
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -430,18 +443,19 @@ private struct DayMasterWidgetEntryView: View {
                     enhancedTaskGrid(limit: 6, radius: 14)
                 }
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 7)
             .padding(.top, 16)
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .scaleEffect(1.1, anchor: .top)
+        .scaleEffect(x: 1.12, y: 1.08, anchor: .top)
         .offset(y: 12)
     }
 
     private var enhancedLarge: some View {
         ZStack {
             WidgetBackground(palette: palette)
+                .scaleEffect(1.05, anchor: .center)
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 3) {
@@ -475,12 +489,12 @@ private struct DayMasterWidgetEntryView: View {
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 7)
             .padding(.top, 16)
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .scaleEffect(1.1, anchor: .center)
+        .scaleEffect(1.05, anchor: .center)
     }
 
     private func inlineView(enhanced: Bool) -> some View {
@@ -559,32 +573,37 @@ private struct DayMasterWidgetEntryView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 5) {
-                    logoBadge(size: compact ? 14 : 16)
+                    if !compact {
+                        logoBadge(size: 16)
+                    }
                     Text(entry.title)
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(palette.primary)
                         .lineLimit(1)
                 }
-                .padding(.leading, compact ? 4 : 0)
+                .padding(.leading, compact ? 6 : 2)
                 Text(dateText)
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
                     .lineLimit(1)
-                    .padding(.leading, compact ? 4 : 0)
+                    .padding(.leading, compact ? 6 : 2)
             }
+            .offset(x: compact ? 2 : 1)
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text("\(visibleTasks.count)")
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(palette.primary)
-                    .padding(.trailing, compact ? 4 : 0)
+                    .frame(width: compact ? 28 : 34, alignment: .leading)
                 Text("任务")
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
-                    .padding(.trailing, compact ? 4 : 0)
+                    .frame(width: compact ? 28 : 34, alignment: .leading)
             }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .offset(x: compact ? -2 : -1)
         }
     }
 

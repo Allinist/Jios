@@ -32,6 +32,7 @@ object DayMasterWidgetHelper {
     private const val PREFS_NAME = "FlutterSharedPreferences"
     private const val TASKS_KEY = "flutter.widget_tasks"
     private const val LOGO_KEY = "flutter.widget_logo_variant"
+    private const val APPEARANCE_KEY = "flutter.widget_appearance_theme"
 
     private fun configKey(mode: WidgetMode): String {
         return when (mode) {
@@ -84,6 +85,11 @@ object DayMasterWidgetHelper {
             "BlueLogo" -> "BlueLogo"
             else -> "PinkLogo"
         }
+    }
+
+    fun loadAppearanceTheme(context: Context): String {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(APPEARANCE_KEY, "auto") ?: "auto"
     }
 
     private fun parseTasks(payload: String): List<WidgetTask> {

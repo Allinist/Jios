@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'pages/main/mainNavigationPage.dart';
 import 'pages/task/createTaskPage.dart';
+import 'services/appThemeService.dart';
 import 'services/notificationService.dart';
 import 'services/widgetServices.dart';
 
@@ -20,6 +21,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _initWidgetClickChannel();
   NotificationService.requestPermission();
+  await AppThemeService.init();
   await WidgetService.syncWidgetData();
   await WidgetService.refreshWidget();
   runApp(const DayMasterApp());
@@ -30,15 +32,17 @@ class DayMasterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Jios',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const MainNavigationPage(),
-      routes: {
-        '/createTask': (_) => const CreateTaskPage(),
+    return ValueListenableBuilder<String>(
+      valueListenable: AppThemeService.notifier,
+      builder: (context, theme, _) {
+        return MaterialApp(
+          title: 'Jios',
+          theme: AppThemeService.buildTheme(theme),
+          home: const MainNavigationPage(),
+          routes: {
+            '/createTask': (_) => const CreateTaskPage(),
+          },
+        );
       },
     );
   }

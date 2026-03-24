@@ -43,6 +43,12 @@ abstract class BaseDayMasterWidgetProvider : AppWidgetProvider() {
         val tasks = DayMasterWidgetHelper.loadTasks(context, mode)
         val views = RemoteViews(context.packageName, R.layout.daymaster_widget)
         views.setTextViewText(R.id.widgetTitle, title)
+        val appearanceTheme = DayMasterWidgetHelper.loadAppearanceTheme(context)
+        val backgroundRes = when (appearanceTheme) {
+            "rose_blush" -> R.drawable.daymaster_widget_bg_pink
+            else -> R.drawable.daymaster_widget_bg
+        }
+        views.setInt(R.id.widgetRoot, "setBackgroundResource", backgroundRes)
         val logoRes = when (DayMasterWidgetHelper.loadLogoVariant(context)) {
             "BlueLogo" -> R.drawable.blue_logo
             else -> R.drawable.pink_logo
@@ -50,6 +56,11 @@ abstract class BaseDayMasterWidgetProvider : AppWidgetProvider() {
         views.setImageViewResource(R.id.widgetLogo, logoRes)
 
         val maxLines = lineCountBySize(appWidgetManager, appWidgetId)
+        val isCompact = maxLines <= 4
+        views.setViewVisibility(
+            R.id.widgetLogo,
+            if (isCompact) android.view.View.GONE else android.view.View.VISIBLE,
+        )
         bindLines(views, tasks, maxLines)
         bindOpenAppIntent(context, views)
 
