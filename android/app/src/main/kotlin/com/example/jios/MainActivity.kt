@@ -1,6 +1,8 @@
 package com.example.jios
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
@@ -36,6 +38,19 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "app_icon")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "set_app_icon" -> {
+                        val args = call.arguments as? Map<*, *>
+                        val variant = args?.get("variant") as? String ?: "PinkLogo"
+                        setLauncherAlias(variant)
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "task_notification")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -59,5 +74,33 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    private fun setLauncherAlias(variant: String) {
+        val pinkAlias = ComponentName(this, "com.example.jios.PinkLauncherAlias")
+        val blueAlias = ComponentName(this, "com.example.jios.BlueLauncherAlias")
+
+        val pinkState = if (variant == "BlueLogo") {
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        } else {
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        }
+
+        val blueState = if (variant == "BlueLogo") {
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        } else {
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        }
+
+        packageManager.setComponentEnabledSetting(
+            pinkAlias,
+            pinkState,
+            PackageManager.DONT_KILL_APP,
+        )
+        packageManager.setComponentEnabledSetting(
+            blueAlias,
+            blueState,
+            PackageManager.DONT_KILL_APP,
+        )
     }
 }

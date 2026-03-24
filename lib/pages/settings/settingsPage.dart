@@ -19,6 +19,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _busy = false;
   String _widgetAppearanceTheme = WidgetService.widgetThemeAuto;
   String _widgetLogoVariant = WidgetService.widgetLogoPink;
+  String _appLogoVariant = WidgetService.widgetLogoPink;
 
   String _configuredWidgetMode = 'today';
   int? _configuredWidgetTaskBookId;
@@ -53,6 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
     final appearanceTheme = await WidgetService.loadWidgetAppearanceTheme();
     final logoVariant = await WidgetService.loadWidgetLogoVariant();
+    final appLogoVariant = await WidgetService.loadAppLogoVariant();
 
     if (!mounted) return;
 
@@ -70,6 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
           (lockSelected['task_ids'] as List? ?? []).whereType<int>().toList();
       _widgetAppearanceTheme = appearanceTheme;
       _widgetLogoVariant = logoVariant;
+      _appLogoVariant = appLogoVariant;
     });
   }
 
@@ -140,6 +143,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _saveWidgetAppearanceTheme() async {
     await WidgetService.saveWidgetAppearanceTheme(_widgetAppearanceTheme);
     await WidgetService.saveWidgetLogoVariant(_widgetLogoVariant);
+    await WidgetService.saveAppLogoVariant(_appLogoVariant);
     await WidgetService.refreshWidget();
 
     if (!mounted) return;
@@ -201,9 +205,32 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
+                initialValue: _appLogoVariant,
+                decoration: const InputDecoration(
+                  labelText: '应用 Logo',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoPink,
+                    child: Text('PinkLogo'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoBlue,
+                    child: Text('BlueLogo'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _appLogoVariant = value ?? WidgetService.widgetLogoPink;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
                 initialValue: _widgetLogoVariant,
                 decoration: const InputDecoration(
-                  labelText: 'Logo',
+                  labelText: '小组件 Logo',
                   border: OutlineInputBorder(),
                 ),
                 items: const [

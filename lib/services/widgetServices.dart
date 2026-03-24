@@ -18,6 +18,7 @@ class WidgetService {
   static const int _displayUntilNext = 16;
 
   static const platform = MethodChannel('widget_refresh');
+  static const appIconPlatform = MethodChannel('app_icon');
   static const String _iosAppGroup = 'group.com.example.jios';
 
   static const String _tasksKey = 'widget_tasks';
@@ -25,6 +26,7 @@ class WidgetService {
   static const String _configPrefix = 'widget_config_';
   static const String _appearanceKey = 'widget_appearance_theme';
   static const String _logoKey = 'widget_logo_variant';
+  static const String _appLogoKey = 'app_logo_variant';
 
   static const String scopeConfigured = 'configured';
   static const String scopeBook = 'book';
@@ -442,6 +444,26 @@ class WidgetService {
   static Future<String> loadWidgetLogoVariant() async {
     final prefs = await SharedPreferences.getInstance();
     final text = prefs.getString(_logoKey);
+    if (text == null || text.trim().isEmpty) {
+      return widgetLogoPink;
+    }
+    return text;
+  }
+
+  static Future<void> saveAppLogoVariant(String logo) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_appLogoKey, logo);
+    await _saveSharedStringForIOS(key: _appLogoKey, value: logo);
+    try {
+      await appIconPlatform.invokeMethod('set_app_icon', {
+        'variant': logo,
+      });
+    } catch (_) {}
+  }
+
+  static Future<String> loadAppLogoVariant() async {
+    final prefs = await SharedPreferences.getInstance();
+    final text = prefs.getString(_appLogoKey);
     if (text == null || text.trim().isEmpty) {
       return widgetLogoPink;
     }
