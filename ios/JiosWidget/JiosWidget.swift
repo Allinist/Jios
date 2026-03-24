@@ -405,7 +405,7 @@ private struct DayMasterWidgetEntryView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .scaleEffect(0.9, anchor: .top)
-        .offset(y: 8)
+        .offset(y: 12)
     }
 
     private var enhancedMedium: some View {
@@ -424,7 +424,8 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .offset(y: 8)
+        .scaleEffect(1.1, anchor: .top)
+        .offset(y: 12)
     }
 
     private var enhancedLarge: some View {
@@ -547,10 +548,12 @@ private struct DayMasterWidgetEntryView: View {
                     .font(compact ? .caption2.weight(.bold) : .caption.weight(.semibold))
                     .foregroundStyle(palette.primary)
                     .lineLimit(1)
+                    .padding(.leading, compact ? 4 : 0)
                 Text(dateText)
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
                     .lineLimit(1)
+                    .padding(.leading, compact ? 4 : 0)
             }
 
             Spacer()
@@ -559,9 +562,11 @@ private struct DayMasterWidgetEntryView: View {
                 Text("\(visibleTasks.count)")
                     .font(compact ? .headline.weight(.semibold) : .title3.weight(.semibold))
                     .foregroundStyle(palette.primary)
+                    .padding(.trailing, compact ? 4 : 0)
                 Text("任务")
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
+                    .padding(.trailing, compact ? 4 : 0)
             }
         }
     }
