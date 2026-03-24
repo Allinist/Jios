@@ -75,6 +75,7 @@ private struct SimpleEntry: TimelineEntry {
     let title: String
     let hideLockscreenTitle: Bool
     let appearanceTheme: WidgetAppearanceTheme
+    let logoVariant: String
 }
 
 private struct Provider: TimelineProvider {
@@ -89,7 +90,8 @@ private struct Provider: TimelineProvider {
             tasks: [],
             title: title,
             hideLockscreenTitle: hideLockscreenTitle,
-            appearanceTheme: .auto
+            appearanceTheme: .auto,
+            logoVariant: "PinkLogo"
         )
     }
 
@@ -107,13 +109,22 @@ private struct Provider: TimelineProvider {
             tasks: loadTasks(),
             title: title,
             hideLockscreenTitle: hideLockscreenTitle,
-            appearanceTheme: loadAppearanceTheme()
+            appearanceTheme: loadAppearanceTheme(),
+            logoVariant: loadLogoVariant()
         )
     }
 
     private func loadAppearanceTheme() -> WidgetAppearanceTheme {
         let raw = UserDefaults(suiteName: "group.com.example.jios")?.string(forKey: "widget_appearance_theme")
         return WidgetAppearanceTheme(rawValue: raw ?? "") ?? .auto
+    }
+
+    private func loadLogoVariant() -> String {
+        let raw = UserDefaults(suiteName: "group.com.example.jios")?.string(forKey: "widget_logo_variant")
+        if raw == "BlueLogo" {
+            return "BlueLogo"
+        }
+        return "PinkLogo"
     }
 
     private func loadTasks() -> [WidgetTask] {
@@ -416,7 +427,7 @@ private struct DayMasterWidgetEntryView: View {
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
-                    enhancedTaskGrid(limit: 8, radius: 14)
+                    enhancedTaskGrid(limit: 6, radius: 14)
                 }
             }
             .padding(.horizontal, 10)
@@ -434,9 +445,12 @@ private struct DayMasterWidgetEntryView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(entry.title)
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(palette.secondary)
+                        HStack(spacing: 6) {
+                            logoBadge(size: 18)
+                            Text(entry.title)
+                        }
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(palette.secondary)
                         Text(dateText)
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(palette.primary)
@@ -544,11 +558,14 @@ private struct DayMasterWidgetEntryView: View {
     private func header(compact: Bool) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 1) {
-                Text(entry.title)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(palette.primary)
-                    .lineLimit(1)
-                    .padding(.leading, compact ? 4 : 0)
+                HStack(spacing: 5) {
+                    logoBadge(size: compact ? 14 : 16)
+                    Text(entry.title)
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(palette.primary)
+                        .lineLimit(1)
+                }
+                .padding(.leading, compact ? 4 : 0)
                 Text(dateText)
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
@@ -683,6 +700,14 @@ private struct DayMasterWidgetEntryView: View {
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
                     .stroke(Color.white.opacity(0.18), lineWidth: 1)
             )
+    }
+
+    private func logoBadge(size: CGFloat) -> some View {
+        Image(entry.logoVariant)
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.28, style: .continuous))
     }
 
     private func accentColor(for task: WidgetTask) -> Color {

@@ -24,6 +24,7 @@ class WidgetService {
   static const String _legacyConfigKey = 'widget_config';
   static const String _configPrefix = 'widget_config_';
   static const String _appearanceKey = 'widget_appearance_theme';
+  static const String _logoKey = 'widget_logo_variant';
 
   static const String scopeConfigured = 'configured';
   static const String scopeBook = 'book';
@@ -35,6 +36,8 @@ class WidgetService {
   static const String widgetThemeWarmSand = 'warm_sand';
   static const String widgetThemeNightGraphite = 'night_graphite';
   static const String widgetThemeAuto = 'auto';
+  static const String widgetLogoPink = 'PinkLogo';
+  static const String widgetLogoBlue = 'BlueLogo';
 
   static Future<void> syncWidgetData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -426,6 +429,21 @@ class WidgetService {
     final text = prefs.getString(_appearanceKey);
     if (text == null || text.trim().isEmpty) {
       return widgetThemeAuto;
+    }
+    return text;
+  }
+
+  static Future<void> saveWidgetLogoVariant(String logo) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_logoKey, logo);
+    await _saveSharedStringForIOS(key: _logoKey, value: logo);
+  }
+
+  static Future<String> loadWidgetLogoVariant() async {
+    final prefs = await SharedPreferences.getInstance();
+    final text = prefs.getString(_logoKey);
+    if (text == null || text.trim().isEmpty) {
+      return widgetLogoPink;
     }
     return text;
   }

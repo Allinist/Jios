@@ -18,6 +18,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _busy = false;
   String _widgetAppearanceTheme = WidgetService.widgetThemeAuto;
+  String _widgetLogoVariant = WidgetService.widgetLogoPink;
 
   String _configuredWidgetMode = 'today';
   int? _configuredWidgetTaskBookId;
@@ -51,6 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
       scope: WidgetService.scopeLockSelected,
     );
     final appearanceTheme = await WidgetService.loadWidgetAppearanceTheme();
+    final logoVariant = await WidgetService.loadWidgetLogoVariant();
 
     if (!mounted) return;
 
@@ -67,6 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _lockSelectedWidgetTaskIds =
           (lockSelected['task_ids'] as List? ?? []).whereType<int>().toList();
       _widgetAppearanceTheme = appearanceTheme;
+      _widgetLogoVariant = logoVariant;
     });
   }
 
@@ -136,6 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _saveWidgetAppearanceTheme() async {
     await WidgetService.saveWidgetAppearanceTheme(_widgetAppearanceTheme);
+    await WidgetService.saveWidgetLogoVariant(_widgetLogoVariant);
     await WidgetService.refreshWidget();
 
     if (!mounted) return;
@@ -192,6 +196,30 @@ class _SettingsPageState extends State<SettingsPage> {
                   setState(() {
                     _widgetAppearanceTheme =
                         value ?? WidgetService.widgetThemeAuto;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _widgetLogoVariant,
+                decoration: const InputDecoration(
+                  labelText: 'Logo',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoPink,
+                    child: Text('PinkLogo'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoBlue,
+                    child: Text('BlueLogo'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _widgetLogoVariant =
+                        value ?? WidgetService.widgetLogoPink;
                   });
                 },
               ),
