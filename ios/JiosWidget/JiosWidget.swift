@@ -404,6 +404,8 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .scaleEffect(0.9, anchor: .top)
+        .offset(y: 8)
     }
 
     private var enhancedMedium: some View {
@@ -414,7 +416,7 @@ private struct DayMasterWidgetEntryView: View {
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
-                    enhancedTaskList(limit: 8, compact: false, radius: 14)
+                    enhancedTaskGrid(limit: 8, radius: 14)
                 }
             }
             .padding(.horizontal, 10)
@@ -422,6 +424,7 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .offset(y: 8)
     }
 
     private var enhancedLarge: some View {
@@ -462,6 +465,7 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .scaleEffect(1.1, anchor: .center)
     }
 
     private func inlineView(enhanced: Bool) -> some View {
@@ -526,7 +530,7 @@ private struct DayMasterWidgetEntryView: View {
                                 Divider().overlay(palette.divider)
                             }
                         } else {
-                            standardRow(item.task, compact: true)
+                            standardRow(item.task, compact: false)
                         }
                     }
                 }
@@ -629,6 +633,46 @@ private struct DayMasterWidgetEntryView: View {
         .padding(.horizontal, compact ? 8 : 10)
         .padding(.vertical, compact ? 4 : 6)
         .background(card(fill: compact ? palette.card : palette.strongCard, radius: radius))
+    }
+
+    private func enhancedTaskGrid(limit: Int, radius: CGFloat) -> some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), spacing: 8, alignment: .topLeading),
+                GridItem(.flexible(), spacing: 8, alignment: .topLeading)
+            ],
+            spacing: 6
+        ) {
+            ForEach(visibleTasks.prefix(limit)) { item in
+                enhancedGridCell(item.task, radius: radius)
+            }
+        }
+    }
+
+    private func enhancedGridCell(_ task: WidgetTask, radius: CGFloat) -> some View {
+        HStack(spacing: 6) {
+            Capsule()
+                .fill(accentColor(for: task))
+                .frame(width: 4, height: 16)
+
+            Text(task.title)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(palette.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.82)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            if !task.widgetInfo.isEmpty {
+                Text(task.widgetInfo)
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundStyle(palette.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 7)
+        .background(card(fill: palette.strongCard, radius: radius))
     }
 
     private func card(fill: Color, radius: CGFloat) -> some View {
