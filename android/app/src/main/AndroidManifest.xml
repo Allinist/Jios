@@ -62,6 +62,7 @@
 
         <receiver
             android:name=".widget.DayMasterConfiguredWidgetProvider"
+            android:label="@string/widget_label_configured_traditional"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -73,6 +74,7 @@
 
         <receiver
             android:name=".widget.DayMasterTodayWidgetProvider"
+            android:label="@string/widget_label_today_traditional"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -84,6 +86,7 @@
 
         <receiver
             android:name=".widget.DayMasterTaskBookWidgetProvider"
+            android:label="@string/widget_label_book_traditional"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -95,6 +98,7 @@
 
         <receiver
             android:name=".widget.DayMasterSelectedWidgetProvider"
+            android:label="@string/widget_label_selected_traditional"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -106,6 +110,7 @@
 
         <receiver
             android:name=".widget.DayMasterAllWidgetProvider"
+            android:label="@string/widget_label_all_traditional"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
