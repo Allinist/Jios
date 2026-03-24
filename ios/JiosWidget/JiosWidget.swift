@@ -438,7 +438,7 @@ private struct DayMasterWidgetEntryView: View {
             WidgetBackground(palette: palette)
                 .scaleEffect(1.05, anchor: .center)
             VStack(alignment: .leading, spacing: 8) {
-                header(compact: false)
+                header(compact: false, countOffsetX: 2)
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
@@ -571,7 +571,7 @@ private struct DayMasterWidgetEntryView: View {
         }
     }
 
-    private func header(compact: Bool) -> some View {
+    private func header(compact: Bool, countOffsetX: CGFloat = 0) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 5) {
@@ -605,7 +605,7 @@ private struct DayMasterWidgetEntryView: View {
                     .frame(width: compact ? 28 : 34, alignment: .leading)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
-            .offset(x: compact ? -2 : -1)
+            .offset(x: (compact ? -2 : -1) + countOffsetX)
         }
     }
 
