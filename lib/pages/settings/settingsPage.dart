@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('按设置小组件配置已保存')),
+      const SnackBar(content: Text('自定义小组件配置已保存')),
     );
   }
 
@@ -204,8 +204,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildConfiguredWidgetTile() {
     return ExpansionTile(
       key: const PageStorageKey<String>('settings_tile_configured_widget'),
-      title: const Text('按设置小组件配置'),
-      subtitle: const Text('对应“日程（按设置）”小组件'),
+      title: const Text('自定义小组件配置'),
+      subtitle: const Text('对应“日程（自定义）”小组件'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         DropdownButtonFormField<String>(
@@ -259,7 +259,7 @@ class _SettingsPageState extends State<SettingsPage> {
         FilledButton.icon(
           onPressed: _saveConfiguredWidgetConfig,
           icon: const Icon(Icons.save),
-          label: const Text('保存按设置小组件配置'),
+          label: const Text('保存自定义小组件配置'),
         ),
       ],
     );

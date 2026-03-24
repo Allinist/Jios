@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">jios</string>
-    <string name="widget_label_configured_traditional">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#x00B7;&#x65E5;&#x7A0B;&#xFF08;&#x6309;&#x8BBE;&#x7F6E;&#xFF09;</string>
+    <string name="widget_label_configured_traditional">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#x00B7;&#x65E5;&#x7A0B;&#xFF08;&#x81EA;&#x5B9A;&#x4E49;&#xFF09;</string>
     <string name="widget_label_today_traditional">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#x00B7;&#x4ECA;&#x65E5;&#x65E5;&#x7A0B;</string>
     <string name="widget_label_book_traditional">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#x00B7;&#x4EFB;&#x52A1;&#x672C;&#x65E5;&#x7A0B;</string>
     <string name="widget_label_selected_traditional">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#x00B7;&#x9009;&#x5B9A;&#x65E5;&#x7A0B;</string>
     <string name="widget_label_all_traditional">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#x00B7;&#x5168;&#x90E8;&#x5F85;&#x529E;</string>
-    <string name="widget_desc_configured">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#xFF0C;&#x6309;&#x5E94;&#x7528;&#x8BBE;&#x7F6E;&#x663E;&#x793A;&#x4ECA;&#x65E5;&#x65E5;&#x7A0B;&#x3001;&#x4EFB;&#x52A1;&#x672C;&#x6216;&#x9009;&#x5B9A;&#x4EFB;&#x52A1;</string>
+    <string name="widget_desc_configured">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#xFF0C;&#x6309;&#x81EA;&#x5B9A;&#x4E49;&#x914D;&#x7F6E;&#x663E;&#x793A;&#x4ECA;&#x65E5;&#x65E5;&#x7A0B;&#x3001;&#x4EFB;&#x52A1;&#x672C;&#x6216;&#x9009;&#x5B9A;&#x4EFB;&#x52A1;</string>
     <string name="widget_desc_today">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#xFF0C;&#x663E;&#x793A;&#x4ECA;&#x65E5;&#x672A;&#x5B8C;&#x6210;&#x65E5;&#x7A0B;</string>
     <string name="widget_desc_book">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#xFF0C;&#x663E;&#x793A;&#x4EFB;&#x52A1;&#x672C;&#x4E2D;&#x7684;&#x672A;&#x5B8C;&#x6210;&#x65E5;&#x7A0B;</string>
     <string name="widget_desc_selected">iOS&#x5C0F;&#x7EC4;&#x4EF6;&#x4F20;&#x7EDF;&#x7248;&#xFF0C;&#x663E;&#x793A;&#x8BBE;&#x7F6E;&#x4E2D;&#x9009;&#x5B9A;&#x7684;&#x4E00;&#x7EC4;&#x4EFB;&#x52A1;</string>

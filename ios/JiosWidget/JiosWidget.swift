@@ -785,7 +785,7 @@ private struct WidgetConfigurationBuilder {
 
 struct JiosConfiguredWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredWidget", title: "日程（按设置）", description: "按应用设置显示今日日程、任务本或指定任务", mode: .configured)
+        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredWidget", title: "自定义日程", description: "按自定义配置显示今日日程、任务本或指定任务", mode: .configured)
     }
 }
 
@@ -829,7 +829,7 @@ struct JiosLockSelectedWidget: Widget {
 
 struct JiosConfiguredEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredEnhancedWidget", title: "日程（按设置）", description: "毛玻璃雾面渐变与杂志排版风格", mode: .configured, style: .enhanced)
+        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredEnhancedWidget", title: "自定义日程", description: "毛玻璃雾面渐变与杂志排版风格", mode: .configured, style: .enhanced)
     }
 }
 
