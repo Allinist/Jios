@@ -11,17 +11,17 @@ import SwiftUI
 @main
 struct JiosWidgetBundle: WidgetBundle {
     var body: some Widget {
-        JiosConfiguredWidget()
-        JiosTodayWidget()
-        JiosTaskBookWidget()
-        JiosSelectedWidget()
-        JiosAllWidget()
-        JiosLockSelectedWidget()
         JiosConfiguredEnhancedWidget()
         JiosTodayEnhancedWidget()
         JiosTaskBookEnhancedWidget()
         JiosSelectedEnhancedWidget()
         JiosAllEnhancedWidget()
         JiosLockSelectedEnhancedWidget()
+        JiosConfiguredWidget()
+        JiosTodayWidget()
+        JiosTaskBookWidget()
+        JiosSelectedWidget()
+        JiosAllWidget()
+        JiosLockSelectedWidget()
     }
 }

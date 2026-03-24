@@ -429,7 +429,9 @@ private struct DayMasterWidgetEntryView: View {
                     .background(card(fill: palette.card, radius: 13))
                 }
             }
-            .padding(10)
+            .padding(.horizontal, 12)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
@@ -457,8 +459,9 @@ private struct DayMasterWidgetEntryView: View {
                     }
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 10)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
@@ -547,8 +550,9 @@ private struct DayMasterWidgetEntryView: View {
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 10)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
@@ -826,7 +830,6 @@ private struct WidgetConfigurationBuilder {
         .configurationDisplayName(title)
         .description(description)
         .supportedFamilies(families)
-        .contentMarginsDisabled()
     }
 }
 
@@ -834,8 +837,8 @@ struct JiosConfiguredWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterConfiguredWidget",
-            title: "By Settings",
-            description: "Show today, book, or selected tasks",
+            title: "日程（按设置）",
+            description: "按应用设置显示今日日程、任务本或指定任务",
             mode: .configured
         )
     }
@@ -845,8 +848,8 @@ struct JiosTodayWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterTodayWidget",
-            title: "Today",
-            description: "Show unfinished tasks for today",
+            title: "今日日程",
+            description: "显示今日未完成日程",
             mode: .today
         )
     }
@@ -856,8 +859,8 @@ struct JiosTaskBookWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterTaskBookWidget",
-            title: "Task Book",
-            description: "Show unfinished tasks from the chosen book",
+            title: "任务本日程",
+            description: "显示设置中选定任务本的未完成日程",
             mode: .book
         )
     }
@@ -867,8 +870,8 @@ struct JiosSelectedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterSelectedWidget",
-            title: "Selected",
-            description: "Show selected tasks",
+            title: "选定日程",
+            description: "显示设置中选定的一组日程",
             mode: .selected
         )
     }
@@ -878,8 +881,8 @@ struct JiosAllWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterAllWidget",
-            title: "All Tasks",
-            description: "Show all unfinished tasks",
+            title: "全部待办",
+            description: "显示全部未完成日程",
             mode: .all
         )
     }
@@ -889,8 +892,8 @@ struct JiosLockSelectedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterLockSelectedWidget",
-            title: "Lock Selected",
-            description: "Show selected tasks on the lock screen",
+            title: "锁屏选定任务",
+            description: "锁屏显示手动选择任务",
             mode: .selected,
             hideLockscreenTitle: true,
             configKeyOverride: "widget_config_lock_selected",
@@ -903,8 +906,8 @@ struct JiosConfiguredEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterConfiguredEnhancedWidget",
-            title: "By Settings Frosted",
-            description: "Frosted widgets with editorial large layout",
+            title: "日程美化版（按设置）",
+            description: "毛玻璃雾面渐变与杂志排版风格",
             mode: .configured,
             style: .enhanced
         )
@@ -915,8 +918,8 @@ struct JiosTodayEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterTodayEnhancedWidget",
-            title: "Today Frosted",
-            description: "Frosted view for today tasks",
+            title: "今日日程美化版",
+            description: "毛玻璃雾面渐变风格显示今日未完成日程",
             mode: .today,
             style: .enhanced
         )
@@ -927,8 +930,8 @@ struct JiosTaskBookEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterTaskBookEnhancedWidget",
-            title: "Task Book Frosted",
-            description: "Frosted view for task book items",
+            title: "任务本日程美化版",
+            description: "毛玻璃雾面渐变风格显示任务本未完成日程",
             mode: .book,
             style: .enhanced
         )
@@ -939,8 +942,8 @@ struct JiosSelectedEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterSelectedEnhancedWidget",
-            title: "Selected Frosted",
-            description: "Frosted view for selected tasks",
+            title: "选定日程美化版",
+            description: "毛玻璃雾面渐变风格显示选定任务",
             mode: .selected,
             style: .enhanced
         )
@@ -951,8 +954,8 @@ struct JiosAllEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterAllEnhancedWidget",
-            title: "All Frosted",
-            description: "Frosted view for all unfinished tasks",
+            title: "全部待办美化版",
+            description: "毛玻璃雾面渐变风格显示全部未完成日程",
             mode: .all,
             style: .enhanced
         )
@@ -963,8 +966,8 @@ struct JiosLockSelectedEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterLockSelectedEnhancedWidget",
-            title: "Lock Frosted",
-            description: "Frosted lock screen view for selected tasks",
+            title: "锁屏选定任务美化版",
+            description: "锁屏毛玻璃风格显示选定任务",
             mode: .selected,
             style: .enhanced,
             hideLockscreenTitle: true,
