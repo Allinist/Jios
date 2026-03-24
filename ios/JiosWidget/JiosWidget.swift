@@ -342,11 +342,11 @@ private struct DayMasterWidgetEntryView: View {
         Group {
             switch family {
             case .systemSmall:
-                standardList(limit: 6, columns: 1)
+                standardList(limit: 6, columns: 1, compact: true)
             case .systemMedium:
-                standardList(limit: 12, columns: 2)
+                standardList(limit: 12, columns: 2, compact: false)
             case .systemLarge:
-                standardList(limit: 24, columns: 2)
+                standardList(limit: 24, columns: 2, compact: false)
             case .accessoryInline:
                 inlineView(enhanced: false)
             case .accessoryCircular:
@@ -354,7 +354,7 @@ private struct DayMasterWidgetEntryView: View {
             case .accessoryRectangular:
                 rectangularView(enhanced: false)
             default:
-                standardList(limit: 12, columns: 2)
+                standardList(limit: 12, columns: 2, compact: false)
             }
         }
     }
@@ -380,10 +380,10 @@ private struct DayMasterWidgetEntryView: View {
         }
     }
 
-    private func standardList(limit: Int, columns: Int) -> some View {
+    private func standardList(limit: Int, columns: Int, compact: Bool) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(entry.title)
-                .font(.caption)
+                .font(compact ? .caption2 : .caption)
                 .fontWeight(.semibold)
 
             if visibleTasks.isEmpty {
@@ -391,12 +391,12 @@ private struct DayMasterWidgetEntryView: View {
                     .font(.caption2)
             } else if columns == 1 {
                 ForEach(visibleTasks.prefix(limit)) { item in
-                    standardRow(item.task)
+                    standardRow(item.task, compact: compact)
                 }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 3) {
                     ForEach(visibleTasks.prefix(limit)) { item in
-                        standardRow(item.task)
+                        standardRow(item.task, compact: compact)
                     }
                 }
             }
@@ -417,7 +417,7 @@ private struct DayMasterWidgetEntryView: View {
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
-                    enhancedTaskList(limit: 6, compact: true, radius: 13)
+                    enhancedTaskList(limit: 4, compact: true, radius: 13)
                 }
             }
             .padding(.horizontal, 10)
@@ -555,10 +555,10 @@ private struct DayMasterWidgetEntryView: View {
                         if enhanced {
                             enhancedRow(item.task, compact: true)
                         } else {
-                            standardRow(item.task)
+                            standardRow(item.task, compact: true)
                         }
-                        if index < min(visibleTasks.count, 4) - 1 {
-                            Divider().overlay(enhanced ? palette.divider : Color.gray.opacity(0.2))
+                        if enhanced && index < min(visibleTasks.count, 4) - 1 {
+                            Divider().overlay(palette.divider)
                         }
                     }
                 }
@@ -609,16 +609,17 @@ private struct DayMasterWidgetEntryView: View {
         .background(card(fill: palette.card, radius: 14))
     }
 
-    private func standardRow(_ task: WidgetTask) -> some View {
+    private func standardRow(_ task: WidgetTask, compact: Bool) -> some View {
         HStack(spacing: 4) {
             Text(task.title)
-                .font(.caption2)
+                .font(compact ? .system(size: 10, weight: .regular) : .caption2)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if !task.widgetInfo.isEmpty {
                 Text(task.widgetInfo)
-                    .font(.caption2)
+                    .font(compact ? .system(size: 9, weight: .regular) : .caption2)
                     .foregroundColor(.gray)
                     .lineLimit(1)
             }
