@@ -456,7 +456,7 @@ private struct DayMasterWidgetEntryView: View {
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
-                    enhancedTaskList(limit: 12, compact: false, radius: 14)
+                    enhancedTaskList(limit: 8, compact: false, radius: 14)
                 }
 
                 Spacer(minLength: 0)
@@ -545,7 +545,7 @@ private struct DayMasterWidgetEntryView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.title)
-                    .font(compact ? .caption2.weight(.bold) : .caption.weight(.semibold))
+                    .font(.caption2.weight(.bold))
                     .foregroundStyle(palette.primary)
                     .lineLimit(1)
                     .padding(.leading, compact ? 4 : 0)
@@ -560,7 +560,7 @@ private struct DayMasterWidgetEntryView: View {
 
             VStack(alignment: .trailing, spacing: 0) {
                 Text("\(visibleTasks.count)")
-                    .font(compact ? .headline.weight(.semibold) : .title3.weight(.semibold))
+                    .font(.headline.weight(.semibold))
                     .foregroundStyle(palette.primary)
                     .padding(.trailing, compact ? 4 : 0)
                 Text("任务")
@@ -659,20 +659,20 @@ private struct DayMasterWidgetEntryView: View {
                 .frame(width: 4, height: 16)
 
             Text(task.title)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(palette.primary)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if !task.widgetInfo.isEmpty {
                 Text(task.widgetInfo)
-                    .font(.system(size: 9, weight: .regular))
+                    .font(.system(size: 8, weight: .regular))
                     .foregroundStyle(palette.secondary)
                     .lineLimit(1)
             }
         }
         .padding(.horizontal, 9)
-        .padding(.vertical, 5)
+        .padding(.vertical, 4)
         .background(card(fill: palette.strongCard, radius: radius))
     }
 
