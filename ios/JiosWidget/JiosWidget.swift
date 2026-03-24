@@ -494,6 +494,7 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .scaleEffect(1.05, anchor: .center)
     }
 
     private func inlineView(enhanced: Bool) -> some View {
