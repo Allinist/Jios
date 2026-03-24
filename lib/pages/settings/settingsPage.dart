@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Configured widget saved.')),
+      const SnackBar(content: Text('按设置小组件配置已保存')),
     );
   }
 
@@ -108,7 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Task book widget saved.')),
+      const SnackBar(content: Text('任务本小组件配置已保存')),
     );
   }
 
@@ -124,7 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Selected widget saved.')),
+      const SnackBar(content: Text('选定日程小组件配置已保存')),
     );
   }
 
@@ -140,7 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Lock screen widget saved.')),
+      const SnackBar(content: Text('锁屏选定任务小组件配置已保存')),
     );
   }
 
@@ -152,7 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Enhanced widget appearance saved.')),
+      const SnackBar(content: Text('美化版小组件外观已保存')),
     );
   }
 
@@ -161,14 +161,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('System theme saved.')),
+      const SnackBar(content: Text('系统主题已保存')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: const Text('设置')),
       body: ListView(
         children: [
           _buildConfiguredWidgetTile(),
@@ -177,16 +177,16 @@ class _SettingsPageState extends State<SettingsPage> {
           _buildLockSelectedWidgetTile(),
           ListTile(
             leading: const Icon(Icons.upload_file),
-            title: const Text('Export all data (JSON)'),
+            title: const Text('导出全部数据 (JSON)'),
             subtitle: const Text(
-              'Export task_books / tasks / repeat_rules / task_records',
+              '导出 task_books / tasks / repeat_rules / task_records',
             ),
             onTap: _busy ? null : _exportJson,
           ),
           ListTile(
             leading: const Icon(Icons.download),
-            title: const Text('Import all data (JSON)'),
-            subtitle: const Text('Import will overwrite all current data'),
+            title: const Text('导入全部数据 (JSON)'),
+            subtitle: const Text('导入会覆盖当前全部数据'),
             onTap: _busy ? null : _importJson,
           ),
           _buildSystemThemeTile(),
@@ -204,20 +204,20 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildConfiguredWidgetTile() {
     return ExpansionTile(
       key: const PageStorageKey<String>('settings_tile_configured_widget'),
-      title: const Text('Configured widget'),
-      subtitle: const Text('For the configured schedule widget'),
+      title: const Text('按设置小组件配置'),
+      subtitle: const Text('对应“日程（按设置）”小组件'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         DropdownButtonFormField<String>(
           initialValue: _configuredWidgetMode,
           decoration: const InputDecoration(
-            labelText: 'Display mode',
+            labelText: '显示模式',
             border: OutlineInputBorder(),
           ),
           items: const [
-            DropdownMenuItem(value: 'today', child: Text('Today')),
-            DropdownMenuItem(value: 'book', child: Text('Task book')),
-            DropdownMenuItem(value: 'selected', child: Text('Selected tasks')),
+            DropdownMenuItem(value: 'today', child: Text('今日日程')),
+            DropdownMenuItem(value: 'book', child: Text('指定任务本')),
+            DropdownMenuItem(value: 'selected', child: Text('指定任务')),
           ],
           onChanged: (value) {
             setState(() {
@@ -230,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
           DropdownButtonFormField<int?>(
             initialValue: _configuredWidgetTaskBookId,
             decoration: const InputDecoration(
-              labelText: 'Task book',
+              labelText: '任务本',
               border: OutlineInputBorder(),
             ),
             items: _books
@@ -252,14 +252,14 @@ class _SettingsPageState extends State<SettingsPage> {
             onPressed: () => _pickWidgetTasks(configured: true),
             icon: const Icon(Icons.checklist),
             label: Text(
-              '${_configuredWidgetTaskIds.length} selected, tap to edit',
+              '已选择 ${_configuredWidgetTaskIds.length} 个任务，点击修改',
             ),
           ),
         const SizedBox(height: 8),
         FilledButton.icon(
           onPressed: _saveConfiguredWidgetConfig,
           icon: const Icon(Icons.save),
-          label: const Text('Save configured widget'),
+          label: const Text('保存按设置小组件配置'),
         ),
       ],
     );
@@ -268,14 +268,14 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildBookWidgetTile() {
     return ExpansionTile(
       key: const PageStorageKey<String>('settings_tile_book_widget'),
-      title: const Text('Task book widget'),
-      subtitle: const Text('For the task book schedule widget'),
+      title: const Text('任务本小组件配置'),
+      subtitle: const Text('对应“任务本日程”小组件'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         DropdownButtonFormField<int?>(
           initialValue: _bookWidgetTaskBookId,
           decoration: const InputDecoration(
-            labelText: 'Task book',
+            labelText: '任务本',
             border: OutlineInputBorder(),
           ),
           items: _books
@@ -296,7 +296,7 @@ class _SettingsPageState extends State<SettingsPage> {
         FilledButton.icon(
           onPressed: _saveBookWidgetConfig,
           icon: const Icon(Icons.save),
-          label: const Text('Save task book widget'),
+          label: const Text('保存任务本小组件配置'),
         ),
       ],
     );
@@ -305,20 +305,20 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildSelectedWidgetTile() {
     return ExpansionTile(
       key: const PageStorageKey<String>('settings_tile_selected_widget'),
-      title: const Text('Selected widget'),
-      subtitle: const Text('For the selected schedule widget'),
+      title: const Text('选定日程小组件配置'),
+      subtitle: const Text('对应“选定日程”小组件'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         OutlinedButton.icon(
           onPressed: () => _pickWidgetTasks(configured: false),
           icon: const Icon(Icons.checklist),
-          label: Text('${_selectedWidgetTaskIds.length} selected, tap to edit'),
+          label: Text('已选择 ${_selectedWidgetTaskIds.length} 个任务，点击修改'),
         ),
         const SizedBox(height: 8),
         FilledButton.icon(
           onPressed: _saveSelectedWidgetConfig,
           icon: const Icon(Icons.save),
-          label: const Text('Save selected widget'),
+          label: const Text('保存选定日程小组件配置'),
         ),
       ],
     );
@@ -327,8 +327,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildLockSelectedWidgetTile() {
     return ExpansionTile(
       key: const PageStorageKey<String>('settings_tile_lock_selected_widget'),
-      title: const Text('Lock screen selected widget'),
-      subtitle: const Text('For the lock screen selected widget'),
+      title: const Text('锁屏选定任务小组件配置'),
+      subtitle: const Text('对应“锁屏选定任务”小组件'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         OutlinedButton.icon(
@@ -336,14 +336,14 @@ class _SettingsPageState extends State<SettingsPage> {
               _pickWidgetTasks(configured: false, lockSelected: true),
           icon: const Icon(Icons.checklist),
           label: Text(
-            '${_lockSelectedWidgetTaskIds.length} selected, tap to edit',
+            '已选择 ${_lockSelectedWidgetTaskIds.length} 个任务，点击修改',
           ),
         ),
         const SizedBox(height: 8),
         FilledButton.icon(
           onPressed: _saveLockSelectedWidgetConfig,
           icon: const Icon(Icons.save),
-          label: const Text('Save lock screen widget'),
+          label: const Text('保存锁屏选定任务配置'),
         ),
       ],
     );
@@ -352,24 +352,24 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildSystemThemeTile() {
     return ExpansionTile(
       key: const PageStorageKey<String>('settings_tile_system_theme'),
-      title: const Text('System theme'),
-      subtitle: const Text('Theme color for the app'),
+      title: const Text('系统主题'),
+      subtitle: const Text('应用整体主题色'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         DropdownButtonFormField<String>(
           initialValue: _systemTheme,
           decoration: const InputDecoration(
-            labelText: 'Theme palette',
+            labelText: '主题色系',
             border: OutlineInputBorder(),
           ),
           items: const [
             DropdownMenuItem(
               value: AppThemeService.themeBlue,
-              child: Text('Blue'),
+              child: Text('蓝色系'),
             ),
             DropdownMenuItem(
               value: AppThemeService.themePink,
-              child: Text('Pink'),
+              child: Text('粉色系'),
             ),
           ],
           onChanged: (value) {
@@ -382,7 +382,7 @@ class _SettingsPageState extends State<SettingsPage> {
         FilledButton.icon(
           onPressed: _saveSystemTheme,
           icon: const Icon(Icons.color_lens_outlined),
-          label: const Text('Save system theme'),
+          label: const Text('保存系统主题'),
         ),
       ],
     );
@@ -392,40 +392,40 @@ class _SettingsPageState extends State<SettingsPage> {
     return ExpansionTile(
       key: const PageStorageKey<String>('settings_tile_widget_appearance'),
       initiallyExpanded: true,
-      title: const Text('Enhanced widget appearance'),
-      subtitle: const Text('Theme and logo for enhanced widgets'),
+      title: const Text('美化版小组件外观'),
+      subtitle: const Text('控制美化版小组件的主题与 Logo'),
       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         DropdownButtonFormField<String>(
           initialValue: _widgetAppearanceTheme,
           decoration: const InputDecoration(
-            labelText: 'Background theme',
+            labelText: '背景主题',
             border: OutlineInputBorder(),
           ),
           items: const [
             DropdownMenuItem(
               value: WidgetService.widgetThemeAuto,
-              child: Text('Auto'),
+              child: Text('跟随系统'),
             ),
             DropdownMenuItem(
               value: WidgetService.widgetThemeMistLight,
-              child: Text('Mist light'),
+              child: Text('浅雾白灰'),
             ),
             DropdownMenuItem(
               value: WidgetService.widgetThemeSlateBlue,
-              child: Text('Slate blue'),
+              child: Text('冷调蓝灰'),
             ),
             DropdownMenuItem(
               value: WidgetService.widgetThemeWarmSand,
-              child: Text('Warm sand'),
+              child: Text('暖调米灰'),
             ),
             DropdownMenuItem(
               value: WidgetService.widgetThemeRoseBlush,
-              child: Text('Pink'),
+              child: Text('粉色系'),
             ),
             DropdownMenuItem(
               value: WidgetService.widgetThemeNightGraphite,
-              child: Text('Night graphite'),
+              child: Text('夜雾深灰'),
             ),
           ],
           onChanged: (value) {
@@ -438,7 +438,7 @@ class _SettingsPageState extends State<SettingsPage> {
         DropdownButtonFormField<String>(
           initialValue: _appLogoVariant,
           decoration: const InputDecoration(
-            labelText: 'App logo',
+            labelText: '应用 Logo',
             border: OutlineInputBorder(),
           ),
           items: const [
@@ -461,7 +461,7 @@ class _SettingsPageState extends State<SettingsPage> {
         DropdownButtonFormField<String>(
           initialValue: _widgetLogoVariant,
           decoration: const InputDecoration(
-            labelText: 'Widget logo',
+            labelText: '小组件 Logo',
             border: OutlineInputBorder(),
           ),
           items: const [
@@ -484,7 +484,7 @@ class _SettingsPageState extends State<SettingsPage> {
         FilledButton.icon(
           onPressed: _saveWidgetAppearanceTheme,
           icon: const Icon(Icons.palette_outlined),
-          label: const Text('Save enhanced widget appearance'),
+          label: const Text('保存美化版小组件外观'),
         ),
       ],
     );
@@ -504,7 +504,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Select tasks'),
+          title: const Text('选择任务'),
           content: SizedBox(
             width: 520,
             child: ListView(
@@ -531,11 +531,11 @@ class _SettingsPageState extends State<SettingsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: const Text('取消'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Confirm'),
+              child: const Text('确定'),
             ),
           ],
         ),
@@ -569,7 +569,7 @@ class _SettingsPageState extends State<SettingsPage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Export JSON'),
+            title: const Text('导出 JSON'),
             content: SizedBox(
               width: 560,
               child: SingleChildScrollView(
@@ -582,14 +582,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   await Clipboard.setData(ClipboardData(text: jsonText));
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Copied to clipboard.')),
+                    const SnackBar(content: Text('已复制到剪贴板')),
                   );
                 },
-                child: const Text('Copy'),
+                child: const Text('复制'),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                child: const Text('关闭'),
               ),
             ],
           );
@@ -598,7 +598,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Export failed: $e')),
+        SnackBar(content: Text('导出失败: $e')),
       );
     } finally {
       if (mounted) {
@@ -616,7 +616,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Import JSON'),
+          title: const Text('导入 JSON'),
           content: SizedBox(
             width: 560,
             child: TextField(
@@ -624,7 +624,7 @@ class _SettingsPageState extends State<SettingsPage> {
               minLines: 12,
               maxLines: 20,
               decoration: const InputDecoration(
-                hintText: 'Paste exported JSON here',
+                hintText: '请粘贴导出的 JSON 文本',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -632,11 +632,11 @@ class _SettingsPageState extends State<SettingsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: const Text('取消'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Import'),
+              child: const Text('开始导入'),
             ),
           ],
         );
@@ -652,7 +652,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (jsonText.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter JSON content.')),
+        const SnackBar(content: Text('请输入 JSON 内容')),
       );
       return;
     }
@@ -669,12 +669,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Import completed and widget data refreshed.')),
+        const SnackBar(content: Text('导入成功，任务与小组件数据已刷新')),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Import failed: $e')),
+        SnackBar(content: Text('导入失败: $e')),
       );
     } finally {
       if (mounted) {
