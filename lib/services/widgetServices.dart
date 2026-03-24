@@ -37,6 +37,7 @@ class WidgetService {
   static const String widgetThemeSlateBlue = 'slate_blue';
   static const String widgetThemeWarmSand = 'warm_sand';
   static const String widgetThemeNightGraphite = 'night_graphite';
+  static const String widgetThemeRoseBlush = 'rose_blush';
   static const String widgetThemeAuto = 'auto';
   static const String widgetLogoPink = 'PinkLogo';
   static const String widgetLogoBlue = 'BlueLogo';
@@ -429,7 +430,15 @@ class WidgetService {
   static Future<String> loadWidgetAppearanceTheme() async {
     final prefs = await SharedPreferences.getInstance();
     final text = prefs.getString(_appearanceKey);
-    if (text == null || text.trim().isEmpty) {
+    const supportedThemes = {
+      widgetThemeAuto,
+      widgetThemeMistLight,
+      widgetThemeSlateBlue,
+      widgetThemeWarmSand,
+      widgetThemeNightGraphite,
+      widgetThemeRoseBlush,
+    };
+    if (text == null || text.trim().isEmpty || !supportedThemes.contains(text)) {
       return widgetThemeAuto;
     }
     return text;
@@ -452,8 +461,12 @@ class WidgetService {
 
   static Future<void> saveAppLogoVariant(String logo) async {
     final prefs = await SharedPreferences.getInstance();
+    final previous = prefs.getString(_appLogoKey);
     await prefs.setString(_appLogoKey, logo);
     await _saveSharedStringForIOS(key: _appLogoKey, value: logo);
+    if (previous == logo) {
+      return;
+    }
     try {
       await appIconPlatform.invokeMethod('set_app_icon', {
         'variant': logo,
