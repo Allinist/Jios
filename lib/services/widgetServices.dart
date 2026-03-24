@@ -65,6 +65,7 @@ class WidgetService {
         'id': task.id,
         'title': task.title,
         'task_book_id': task.taskBookId,
+        'color': task.color,
         'status': task.status,
         'completed': task.status == 'completed',
         'is_today': isToday,
