@@ -405,7 +405,7 @@ private struct DayMasterWidgetEntryView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .scaleEffect(0.9, anchor: .top)
-        .offset(y: 12)
+        .offset(y: 15)
     }
 
     private var enhancedMedium: some View {
@@ -609,21 +609,19 @@ private struct DayMasterWidgetEntryView: View {
                 .frame(width: compact ? 3 : 4, height: compact ? 14 : 18)
 
             Text(task.title)
-                .font(compact ? .system(size: 10, weight: .medium) : .caption.weight(.medium))
+                .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(palette.primary)
                 .lineLimit(1)
-                .minimumScaleFactor(0.82)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if !task.widgetInfo.isEmpty {
                 Text(task.widgetInfo)
-                    .font(.system(size: compact ? 9 : 10, weight: .regular))
+                    .font(.system(size: 9, weight: .regular))
                     .foregroundStyle(palette.secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
             }
         }
-        .padding(.vertical, compact ? 4 : 5)
+        .padding(.vertical, compact ? 4 : 3)
     }
 
     private func enhancedTaskList(limit: Int, compact: Bool, radius: CGFloat) -> some View {
@@ -636,7 +634,7 @@ private struct DayMasterWidgetEntryView: View {
             }
         }
         .padding(.horizontal, compact ? 8 : 10)
-        .padding(.vertical, compact ? 4 : 6)
+        .padding(.vertical, compact ? 4 : 5)
         .background(card(fill: compact ? palette.card : palette.strongCard, radius: radius))
     }
 
@@ -661,22 +659,20 @@ private struct DayMasterWidgetEntryView: View {
                 .frame(width: 4, height: 16)
 
             Text(task.title)
-                .font(.caption.weight(.medium))
+                .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(palette.primary)
                 .lineLimit(1)
-                .minimumScaleFactor(0.82)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if !task.widgetInfo.isEmpty {
                 Text(task.widgetInfo)
-                    .font(.system(size: 10, weight: .regular))
+                    .font(.system(size: 9, weight: .regular))
                     .foregroundStyle(palette.secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
             }
         }
         .padding(.horizontal, 9)
-        .padding(.vertical, 7)
+        .padding(.vertical, 5)
         .background(card(fill: palette.strongCard, radius: radius))
     }
 
