@@ -415,6 +415,7 @@ private struct DayMasterWidgetEntryView: View {
     private var enhancedSmall: some View {
         ZStack {
             WidgetBackground(palette: palette)
+                .scaleEffect(1.05, anchor: .center)
             VStack(alignment: .leading, spacing: 6) {
                 header(compact: true)
                 if visibleTasks.isEmpty {
@@ -435,8 +436,9 @@ private struct DayMasterWidgetEntryView: View {
     private var enhancedMedium: some View {
         ZStack {
             WidgetBackground(palette: palette)
+                .scaleEffect(1.05, anchor: .center)
             VStack(alignment: .leading, spacing: 8) {
-                header(compact: false)
+                header(compact: false, countOffsetX: 2)
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
@@ -448,7 +450,7 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .scaleEffect(x: 1.12, y: 1.08, anchor: .top)
+        .scaleEffect(x: 1.10, y: 1.08, anchor: .top)
         .offset(y: 12)
     }
 
@@ -569,7 +571,7 @@ private struct DayMasterWidgetEntryView: View {
         }
     }
 
-    private func header(compact: Bool) -> some View {
+    private func header(compact: Bool, countOffsetX: CGFloat = 0) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 5) {
@@ -603,7 +605,7 @@ private struct DayMasterWidgetEntryView: View {
                     .frame(width: compact ? 28 : 34, alignment: .leading)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
-            .offset(x: compact ? -2 : -1)
+            .offset(x: (compact ? -2 : -1) + countOffsetX)
         }
     }
 
@@ -783,7 +785,7 @@ private struct WidgetConfigurationBuilder {
 
 struct JiosConfiguredWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredWidget", title: "日程（按设置）", description: "按应用设置显示今日日程、任务本或指定任务", mode: .configured)
+        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredWidget", title: "自定义日程", description: "按自定义配置显示今日日程、任务本或指定任务", mode: .configured)
     }
 }
 
@@ -827,7 +829,7 @@ struct JiosLockSelectedWidget: Widget {
 
 struct JiosConfiguredEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredEnhancedWidget", title: "日程（按设置）", description: "毛玻璃雾面渐变与杂志排版风格", mode: .configured, style: .enhanced)
+        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredEnhancedWidget", title: "自定义日程", description: "毛玻璃雾面渐变与杂志排版风格", mode: .configured, style: .enhanced)
     }
 }
 
