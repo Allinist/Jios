@@ -204,12 +204,9 @@ private struct Palette {
     let divider: Color
 
     static func resolve(theme: WidgetAppearanceTheme, scheme: ColorScheme) -> Palette {
-        let actualTheme: WidgetAppearanceTheme
-        if theme == .auto {
-            actualTheme = scheme == .dark ? .nightGraphite : .mistLight
-        } else {
-            actualTheme = theme
-        }
+        let actualTheme: WidgetAppearanceTheme = theme == .auto
+            ? (scheme == .dark ? .nightGraphite : .mistLight)
+            : theme
 
         switch actualTheme {
         case .mistLight:
@@ -269,23 +266,13 @@ private struct WidgetBackground: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [palette.top, palette.bottom],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-
+            LinearGradient(colors: [palette.top, palette.bottom], startPoint: .topLeading, endPoint: .bottomTrailing)
             Circle()
                 .fill(palette.orb.opacity(0.28))
                 .frame(width: 190, height: 190)
                 .blur(radius: 20)
                 .offset(x: 76, y: -52)
-
-            LinearGradient(
-                colors: [Color.white.opacity(0.12), .clear],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            LinearGradient(colors: [Color.white.opacity(0.12), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -307,19 +294,13 @@ private struct DayMasterWidgetEntryView: View {
             let scopes = task.widgetScopes
             if scopes.isEmpty { return true }
             switch family {
-            case .systemSmall:
-                return scopes.contains("small")
-            case .systemMedium:
-                return scopes.contains("medium")
-            case .systemLarge:
-                return scopes.contains("large")
-            case .accessoryInline, .accessoryCircular, .accessoryRectangular:
-                return scopes.contains("lockscreen")
-            default:
-                return true
+            case .systemSmall: return scopes.contains("small")
+            case .systemMedium: return scopes.contains("medium")
+            case .systemLarge: return scopes.contains("large")
+            case .accessoryInline, .accessoryCircular, .accessoryRectangular: return scopes.contains("lockscreen")
+            default: return true
             }
         }
-
         return Array(filtered.prefix(30).enumerated()).map { index, task in
             DisplayTask(id: "\(task.id ?? -1)-\(index)", task: task)
         }
@@ -410,10 +391,8 @@ private struct DayMasterWidgetEntryView: View {
     private var enhancedSmall: some View {
         ZStack {
             WidgetBackground(palette: palette)
-
             VStack(alignment: .leading, spacing: 6) {
                 header(compact: true)
-
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
@@ -430,10 +409,8 @@ private struct DayMasterWidgetEntryView: View {
     private var enhancedMedium: some View {
         ZStack {
             WidgetBackground(palette: palette)
-
             VStack(alignment: .leading, spacing: 8) {
                 header(compact: false)
-
                 if visibleTasks.isEmpty {
                     emptyState
                 } else {
@@ -448,28 +425,22 @@ private struct DayMasterWidgetEntryView: View {
     }
 
     private var enhancedLarge: some View {
-        return ZStack {
+        ZStack {
             WidgetBackground(palette: palette)
-
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(entry.title.uppercased())
+                        Text(entry.title)
                             .font(.caption2.weight(.bold))
-                            .tracking(1.3)
                             .foregroundStyle(palette.secondary)
-
                         Text(dateText)
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(palette.primary)
-
-                        Text("\(visibleTasks.count) 项任务")
+                        Text("\(visibleTasks.count) 任务")
                             .font(.caption)
                             .foregroundStyle(palette.secondary)
                     }
-
                     Spacer()
-
                     Text("Jios")
                         .font(.caption2.weight(.bold))
                         .padding(.horizontal, 8)
@@ -510,11 +481,8 @@ private struct DayMasterWidgetEntryView: View {
     private func circularView(enhanced: Bool) -> some View {
         ZStack {
             if enhanced {
-                Circle()
-                    .fill(AngularGradient(colors: [palette.accent, palette.orb, palette.accent], center: .center))
-                Circle()
-                    .inset(by: 6)
-                    .fill(palette.strongCard)
+                Circle().fill(AngularGradient(colors: [palette.accent, palette.orb, palette.accent], center: .center))
+                Circle().inset(by: 6).fill(palette.strongCard)
             } else {
                 Circle().fill(Color.blue.opacity(0.18))
             }
@@ -554,11 +522,11 @@ private struct DayMasterWidgetEntryView: View {
                     ForEach(Array(visibleTasks.prefix(4).enumerated()), id: \.element.id) { index, item in
                         if enhanced {
                             enhancedRow(item.task, compact: true)
+                            if index < min(visibleTasks.count, 4) - 1 {
+                                Divider().overlay(palette.divider)
+                            }
                         } else {
                             standardRow(item.task, compact: true)
-                        }
-                        if enhanced && index < min(visibleTasks.count, 4) - 1 {
-                            Divider().overlay(palette.divider)
                         }
                     }
                 }
@@ -575,7 +543,6 @@ private struct DayMasterWidgetEntryView: View {
                     .font(compact ? .caption2.weight(.bold) : .caption.weight(.semibold))
                     .foregroundStyle(palette.primary)
                     .lineLimit(1)
-
                 Text(dateText)
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
@@ -664,29 +631,6 @@ private struct DayMasterWidgetEntryView: View {
         .background(card(fill: compact ? palette.card : palette.strongCard, radius: radius))
     }
 
-    private func subtitle(for task: WidgetTask) -> String {
-        if !task.widgetInfo.isEmpty {
-            return task.widgetInfo
-        }
-        if let first = task.timelineLines.first, !first.isEmpty {
-            return first
-        }
-        return "Pending"
-    }
-
-    private func sectionTitle(_ text: String) -> some View {
-        HStack(spacing: 8) {
-            Text(text.uppercased())
-                .font(.caption2.weight(.bold))
-                .tracking(1.2)
-                .foregroundStyle(palette.secondary)
-
-            Rectangle()
-                .fill(palette.divider)
-                .frame(height: 1)
-        }
-    }
-
     private func card(fill: Color, radius: CGFloat) -> some View {
         RoundedRectangle(cornerRadius: radius, style: .continuous)
             .fill(fill)
@@ -700,19 +644,11 @@ private struct DayMasterWidgetEntryView: View {
         guard let value = task.color else {
             return palette.accent
         }
-
         let alpha = Double((value >> 24) & 0xff) / 255.0
         let red = Double((value >> 16) & 0xff) / 255.0
         let green = Double((value >> 8) & 0xff) / 255.0
         let blue = Double(value & 0xff) / 255.0
-
-        return Color(
-            .sRGB,
-            red: red,
-            green: green,
-            blue: blue,
-            opacity: alpha == 0 ? 1 : alpha
-        )
+        return Color(.sRGB, red: red, green: green, blue: blue, opacity: alpha == 0 ? 1 : alpha)
     }
 
     private var dateText: String {
@@ -758,56 +694,31 @@ private struct WidgetConfigurationBuilder {
 
 struct JiosConfiguredWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterConfiguredWidget",
-            title: "日程（按设置）",
-            description: "按应用设置显示今日日程、任务本或指定任务",
-            mode: .configured
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredWidget", title: "日程（按设置）", description: "按应用设置显示今日日程、任务本或指定任务", mode: .configured)
     }
 }
 
 struct JiosTodayWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterTodayWidget",
-            title: "今日日程",
-            description: "显示今日未完成日程",
-            mode: .today
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterTodayWidget", title: "今日日程", description: "显示今日未完成日程", mode: .today)
     }
 }
 
 struct JiosTaskBookWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterTaskBookWidget",
-            title: "任务本日程",
-            description: "显示设置中选定任务本的未完成日程",
-            mode: .book
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterTaskBookWidget", title: "任务本日程", description: "显示设置中选定任务本的未完成日程", mode: .book)
     }
 }
 
 struct JiosSelectedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterSelectedWidget",
-            title: "选定日程",
-            description: "显示设置中选定的一组日程",
-            mode: .selected
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterSelectedWidget", title: "选定日程", description: "显示设置中选定的一组日程", mode: .selected)
     }
 }
 
 struct JiosAllWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterAllWidget",
-            title: "全部待办",
-            description: "显示全部未完成日程",
-            mode: .all
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterAllWidget", title: "全部待办", description: "显示全部未完成日程", mode: .all)
     }
 }
 
@@ -827,61 +738,31 @@ struct JiosLockSelectedWidget: Widget {
 
 struct JiosConfiguredEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterConfiguredEnhancedWidget",
-            title: "日程美化版（按设置）",
-            description: "毛玻璃雾面渐变与杂志排版风格",
-            mode: .configured,
-            style: .enhanced
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterConfiguredEnhancedWidget", title: "日程（按设置）", description: "毛玻璃雾面渐变与杂志排版风格", mode: .configured, style: .enhanced)
     }
 }
 
 struct JiosTodayEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterTodayEnhancedWidget",
-            title: "今日日程美化版",
-            description: "毛玻璃雾面渐变风格显示今日未完成日程",
-            mode: .today,
-            style: .enhanced
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterTodayEnhancedWidget", title: "今日日程", description: "毛玻璃雾面渐变风格显示今日未完成日程", mode: .today, style: .enhanced)
     }
 }
 
 struct JiosTaskBookEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterTaskBookEnhancedWidget",
-            title: "任务本日程美化版",
-            description: "毛玻璃雾面渐变风格显示任务本未完成日程",
-            mode: .book,
-            style: .enhanced
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterTaskBookEnhancedWidget", title: "任务本日程", description: "毛玻璃雾面渐变风格显示任务本未完成日程", mode: .book, style: .enhanced)
     }
 }
 
 struct JiosSelectedEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterSelectedEnhancedWidget",
-            title: "选定日程美化版",
-            description: "毛玻璃雾面渐变风格显示选定任务",
-            mode: .selected,
-            style: .enhanced
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterSelectedEnhancedWidget", title: "选定日程", description: "毛玻璃雾面渐变风格显示选定任务", mode: .selected, style: .enhanced)
     }
 }
 
 struct JiosAllEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
-        WidgetConfigurationBuilder.build(
-            kind: "DayMasterAllEnhancedWidget",
-            title: "全部待办美化版",
-            description: "毛玻璃雾面渐变风格显示全部未完成日程",
-            mode: .all,
-            style: .enhanced
-        )
+        WidgetConfigurationBuilder.build(kind: "DayMasterAllEnhancedWidget", title: "全部待办", description: "毛玻璃雾面渐变风格显示全部未完成日程", mode: .all, style: .enhanced)
     }
 }
 
@@ -889,7 +770,7 @@ struct JiosLockSelectedEnhancedWidget: Widget {
     var body: some WidgetConfiguration {
         WidgetConfigurationBuilder.build(
             kind: "DayMasterLockSelectedEnhancedWidget",
-            title: "锁屏选定任务美化版",
+            title: "锁屏选定任务",
             description: "锁屏毛玻璃风格显示选定任务",
             mode: .selected,
             style: .enhanced,
