@@ -455,6 +455,7 @@ private struct DayMasterWidgetEntryView: View {
     private var enhancedLarge: some View {
         ZStack {
             WidgetBackground(palette: palette)
+                .scaleEffect(1.05, anchor: .center)
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 3) {
@@ -493,7 +494,6 @@ private struct DayMasterWidgetEntryView: View {
             .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .scaleEffect(x: 1.1016, y: 1.071, anchor: .center)
     }
 
     private func inlineView(enhanced: Bool) -> some View {
@@ -595,12 +595,13 @@ private struct DayMasterWidgetEntryView: View {
                 Text("\(visibleTasks.count)")
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(palette.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(width: compact ? 28 : 34, alignment: .leading)
                 Text("任务")
                     .font(.caption2)
                     .foregroundStyle(palette.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(width: compact ? 28 : 34, alignment: .leading)
             }
+            .frame(maxWidth: .infinity, alignment: .trailing)
             .offset(x: compact ? -2 : -1)
         }
     }
