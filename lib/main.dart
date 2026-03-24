@@ -35,13 +35,9 @@ class DayMasterApp extends StatelessWidget {
     return ValueListenableBuilder<String>(
       valueListenable: AppThemeService.notifier,
       builder: (context, theme, _) {
-        final seedColor = AppThemeService.seedColorFor(theme);
         return MaterialApp(
           title: 'Jios',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: seedColor),
-            useMaterial3: true,
-          ),
+          theme: AppThemeService.buildTheme(theme),
           home: const MainNavigationPage(),
           routes: {
             '/createTask': (_) => const CreateTaskPage(),
