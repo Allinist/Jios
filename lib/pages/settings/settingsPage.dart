@@ -17,6 +17,9 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _busy = false;
+  String _widgetAppearanceTheme = WidgetService.widgetThemeAuto;
+  String _widgetLogoVariant = WidgetService.widgetLogoPink;
+  String _appLogoVariant = WidgetService.widgetLogoPink;
 
   String _configuredWidgetMode = 'today';
   int? _configuredWidgetTaskBookId;
@@ -37,10 +40,21 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadWidgetConfigData() async {
     final books = await TaskBookDao().getAll();
     final tasks = await TaskDao().getAll();
-    final configured = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeConfigured);
-    final book = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeBook);
-    final selected = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeSelected);
-    final lockSelected = await WidgetService.loadWidgetConfig(scope: WidgetService.scopeLockSelected);
+    final configured = await WidgetService.loadWidgetConfig(
+      scope: WidgetService.scopeConfigured,
+    );
+    final book = await WidgetService.loadWidgetConfig(
+      scope: WidgetService.scopeBook,
+    );
+    final selected = await WidgetService.loadWidgetConfig(
+      scope: WidgetService.scopeSelected,
+    );
+    final lockSelected = await WidgetService.loadWidgetConfig(
+      scope: WidgetService.scopeLockSelected,
+    );
+    final appearanceTheme = await WidgetService.loadWidgetAppearanceTheme();
+    final logoVariant = await WidgetService.loadWidgetLogoVariant();
+    final appLogoVariant = await WidgetService.loadAppLogoVariant();
 
     if (!mounted) return;
 
@@ -49,10 +63,16 @@ class _SettingsPageState extends State<SettingsPage> {
       _tasks = tasks;
       _configuredWidgetMode = configured['mode'] as String? ?? 'today';
       _configuredWidgetTaskBookId = configured['task_book_id'] as int?;
-      _configuredWidgetTaskIds = (configured['task_ids'] as List? ?? []).whereType<int>().toList();
+      _configuredWidgetTaskIds =
+          (configured['task_ids'] as List? ?? []).whereType<int>().toList();
       _bookWidgetTaskBookId = book['task_book_id'] as int?;
-      _selectedWidgetTaskIds = (selected['task_ids'] as List? ?? []).whereType<int>().toList();
-      _lockSelectedWidgetTaskIds = (lockSelected['task_ids'] as List? ?? []).whereType<int>().toList();
+      _selectedWidgetTaskIds =
+          (selected['task_ids'] as List? ?? []).whereType<int>().toList();
+      _lockSelectedWidgetTaskIds =
+          (lockSelected['task_ids'] as List? ?? []).whereType<int>().toList();
+      _widgetAppearanceTheme = appearanceTheme;
+      _widgetLogoVariant = logoVariant;
+      _appLogoVariant = appLogoVariant;
     });
   }
 
@@ -120,6 +140,18 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Future<void> _saveWidgetAppearanceTheme() async {
+    await WidgetService.saveWidgetAppearanceTheme(_widgetAppearanceTheme);
+    await WidgetService.saveWidgetLogoVariant(_widgetLogoVariant);
+    await WidgetService.saveAppLogoVariant(_appLogoVariant);
+    await WidgetService.refreshWidget();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('美化版小组件背景主题已更新')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,11 +159,114 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         children: [
           ExpansionTile(
-            key: const PageStorageKey<String>('settings_tile_configured_widget'),
+            key: const PageStorageKey<String>('settings_tile_widget_appearance'),
             initiallyExpanded: true,
+            title: const Text('美化版小组件外观'),
+            subtitle: const Text('控制新增毛玻璃雾面渐变组件的背景主题'),
+            childrenPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            children: [
+              DropdownButtonFormField<String>(
+                initialValue: _widgetAppearanceTheme,
+                decoration: const InputDecoration(
+                  labelText: '背景主题',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: WidgetService.widgetThemeAuto,
+                    child: Text('跟随系统'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetThemeMistLight,
+                    child: Text('浅雾白灰'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetThemeSlateBlue,
+                    child: Text('冷调蓝灰'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetThemeWarmSand,
+                    child: Text('暖调米灰'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetThemeNightGraphite,
+                    child: Text('夜雾深灰'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _widgetAppearanceTheme =
+                        value ?? WidgetService.widgetThemeAuto;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _appLogoVariant,
+                decoration: const InputDecoration(
+                  labelText: '应用 Logo',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoPink,
+                    child: Text('PinkLogo'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoBlue,
+                    child: Text('BlueLogo'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _appLogoVariant = value ?? WidgetService.widgetLogoPink;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _widgetLogoVariant,
+                decoration: const InputDecoration(
+                  labelText: '小组件 Logo',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoPink,
+                    child: Text('PinkLogo'),
+                  ),
+                  DropdownMenuItem(
+                    value: WidgetService.widgetLogoBlue,
+                    child: Text('BlueLogo'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _widgetLogoVariant =
+                        value ?? WidgetService.widgetLogoPink;
+                  });
+                },
+              ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: _saveWidgetAppearanceTheme,
+                icon: const Icon(Icons.palette_outlined),
+                label: const Text('保存背景主题'),
+              ),
+            ],
+          ),
+          ExpansionTile(
+            key: const PageStorageKey<String>('settings_tile_configured_widget'),
+            initiallyExpanded: false,
             title: const Text('按设置小组件配置'),
             subtitle: const Text('对应“日程（按设置）”小组件'),
-            childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            childrenPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             children: [
               DropdownButtonFormField<String>(
                 initialValue: _configuredWidgetMode,
@@ -142,7 +277,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 items: const [
                   DropdownMenuItem(value: 'today', child: Text('今日日程')),
                   DropdownMenuItem(value: 'book', child: Text('指定任务本')),
-                  DropdownMenuItem(value: 'selected', child: Text('指定一个或多个任务')),
+                  DropdownMenuItem(
+                    value: 'selected',
+                    child: Text('指定一个或多个任务'),
+                  ),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -190,7 +328,10 @@ class _SettingsPageState extends State<SettingsPage> {
             key: const PageStorageKey<String>('settings_tile_book_widget'),
             title: const Text('任务本小组件配置'),
             subtitle: const Text('对应“任务本日程”小组件'),
-            childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            childrenPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             children: [
               DropdownButtonFormField<int?>(
                 initialValue: _bookWidgetTaskBookId,
@@ -224,7 +365,10 @@ class _SettingsPageState extends State<SettingsPage> {
             key: const PageStorageKey<String>('settings_tile_selected_widget'),
             title: const Text('选定日程小组件配置'),
             subtitle: const Text('对应“选定日程”小组件'),
-            childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            childrenPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             children: [
               OutlinedButton.icon(
                 onPressed: () => _pickWidgetTasks(configured: false),
@@ -240,13 +384,19 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           ExpansionTile(
-            key: const PageStorageKey<String>('settings_tile_lock_selected_widget'),
+            key: const PageStorageKey<String>(
+              'settings_tile_lock_selected_widget',
+            ),
             title: const Text('锁屏选定任务小组件配置'),
             subtitle: const Text('对应“锁屏选定任务”小组件'),
-            childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            childrenPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             children: [
               OutlinedButton.icon(
-                onPressed: () => _pickWidgetTasks(configured: false, lockSelected: true),
+                onPressed: () =>
+                    _pickWidgetTasks(configured: false, lockSelected: true),
                 icon: const Icon(Icons.checklist),
                 label: Text('已选择 ${_lockSelectedWidgetTaskIds.length} 个任务，点击修改'),
               ),
@@ -280,7 +430,10 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<void> _pickWidgetTasks({required bool configured, bool lockSelected = false}) async {
+  Future<void> _pickWidgetTasks({
+    required bool configured,
+    bool lockSelected = false,
+  }) async {
     final selected = lockSelected
         ? {..._lockSelectedWidgetTaskIds}
         : configured

@@ -1,17 +1,105 @@
-# jios
+# Jios
 
-A new Flutter project.
+一个基于 Flutter 开发的高效任务管理与时间规划应用，支持周期任务的本地优先存储日程管理软件，旨在帮助用户更好地管理日常生活与长期目标。
 
-## Getting Started
+⸻
 
-This project is a starting point for a Flutter application.
+✨ 功能特性
 
-A few resources to get you started if this is your first Flutter project:
+📅 日历视图
+	•	支持按月展示任务
+	•	可视化显示每日任务分布
+	•	支持多任务本筛选
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+✅ 任务管理
+	•	创建 / 编辑 / 删除任务
+	•	支持任务颜色自定义
+	•	支持任务分类（任务本）
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+🔁 周期任务（核心功能）
+
+支持多种复杂周期规则：
+	•	每天 / 每周 / 每月
+	•	每 N 天
+	•	每周的某几天
+	•	每月的第几个星期几
+	•	每月固定日期
+
+📒 任务本（Task Book）
+	•	自定义任务集合
+	•	可设置名称、描述、主题颜色
+	•	支持多选展示
+	•	内置默认任务本（不可删除）
+
+🎉 纪念日功能
+	•	添加重要日期（生日、纪念日等）
+	•	自动提醒
+	•	支持倒计时展示
+
+📖 历史上的今天（规划中）
+	•	展示历史事件
+	•	增强应用趣味性与信息性
+
+💾 数据存储
+	•	本地优先（离线可用）
+	•	可扩展服务器同步（MySQL）
+
+⸻
+
+🧱 技术栈
+	•	Flutter（跨平台开发）
+	•	Dart
+	•	SQLite / 本地数据库
+	•	可选：MySQL（远程同步）
+
+⸻
+
+🚀 快速开始
+
+⸻
+
+📱 平台支持
+	•	✅ Android
+	•	✅ iOS
+	•	⏳ Web（可扩展）
+
+⸻
+
+⚙️ 配置说明
+
+⸻
+
+📂 项目结构（建议）
+
+lib/
+ ├── models/        # 数据模型
+ ├── pages/         # 页面
+ ├── widgets/       # 通用组件
+ ├── services/      # 数据/网络服务
+ ├── utils/         # 工具类
+ └── main.dart      # 入口文件
+
+
+⸻
+
+🛠️ 开发计划
+
+⸻
+
+🤝 贡献
+
+⸻
+
+📄 License
+
+MIT License
+
+⸻
+
+💡 项目愿景
+
+Jios 希望成为一个：
+
+既能管理日常，又能记录人生的重要工具。
+
+不仅是任务管理器，更是你的时间管家。

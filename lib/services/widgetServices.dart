@@ -18,16 +18,28 @@ class WidgetService {
   static const int _displayUntilNext = 16;
 
   static const platform = MethodChannel('widget_refresh');
+  static const appIconPlatform = MethodChannel('app_icon');
   static const String _iosAppGroup = 'group.com.example.jios';
 
   static const String _tasksKey = 'widget_tasks';
   static const String _legacyConfigKey = 'widget_config';
   static const String _configPrefix = 'widget_config_';
+  static const String _appearanceKey = 'widget_appearance_theme';
+  static const String _logoKey = 'widget_logo_variant';
+  static const String _appLogoKey = 'app_logo_variant';
 
   static const String scopeConfigured = 'configured';
   static const String scopeBook = 'book';
   static const String scopeSelected = 'selected';
   static const String scopeLockSelected = 'lock_selected';
+
+  static const String widgetThemeMistLight = 'mist_light';
+  static const String widgetThemeSlateBlue = 'slate_blue';
+  static const String widgetThemeWarmSand = 'warm_sand';
+  static const String widgetThemeNightGraphite = 'night_graphite';
+  static const String widgetThemeAuto = 'auto';
+  static const String widgetLogoPink = 'PinkLogo';
+  static const String widgetLogoBlue = 'BlueLogo';
 
   static Future<void> syncWidgetData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -36,6 +48,34 @@ class WidgetService {
     final ruleDao = RepeatRuleDao();
 
     final tasks = await taskDao.getAll();
+    final sortedTasks = [...tasks]..sort((a, b) {
+      final aOrder = a.manualOrder;
+      final bOrder = b.manualOrder;
+
+      if (aOrder != null && bOrder != null && aOrder != bOrder) {
+        return aOrder.compareTo(bOrder);
+      }
+      if (aOrder != null && bOrder == null) {
+        return -1;
+      }
+      if (aOrder == null && bOrder != null) {
+        return 1;
+      }
+
+      final aCompleted = a.status == 'completed';
+      final bCompleted = b.status == 'completed';
+      if (aCompleted != bCompleted) {
+        return aCompleted ? 1 : -1;
+      }
+
+      final aEnd = a.endDate ?? 9223372036854775807;
+      final bEnd = b.endDate ?? 9223372036854775807;
+      if (aEnd != bEnd) {
+        return aEnd.compareTo(bEnd);
+      }
+
+      return a.createdAt.compareTo(b.createdAt);
+    });
     final books = await taskBookDao.getAll();
 
     final Map<int, RepeatRule?> ruleMap = {};
@@ -47,7 +87,7 @@ class WidgetService {
 
     final today = DateTime.now();
 
-    final data = tasks.map((task) {
+    final data = sortedTasks.map((task) {
       final rule = task.repeatRuleId == null ? null : ruleMap[task.repeatRuleId!];
       final isToday = TaskScheduler.shouldShowTask(task, rule, today);
       final timelineLines = _buildTimelineLines(task, rule, today);
@@ -58,6 +98,7 @@ class WidgetService {
         'id': task.id,
         'title': task.title,
         'task_book_id': task.taskBookId,
+        'color': task.color,
         'status': task.status,
         'completed': task.status == 'completed',
         'is_today': isToday,
@@ -377,6 +418,56 @@ class WidgetService {
     try {
       await platform.invokeMethod('reload');
     } catch (_) {}
+  }
+
+  static Future<void> saveWidgetAppearanceTheme(String theme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_appearanceKey, theme);
+    await _saveSharedStringForIOS(key: _appearanceKey, value: theme);
+  }
+
+  static Future<String> loadWidgetAppearanceTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final text = prefs.getString(_appearanceKey);
+    if (text == null || text.trim().isEmpty) {
+      return widgetThemeAuto;
+    }
+    return text;
+  }
+
+  static Future<void> saveWidgetLogoVariant(String logo) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_logoKey, logo);
+    await _saveSharedStringForIOS(key: _logoKey, value: logo);
+  }
+
+  static Future<String> loadWidgetLogoVariant() async {
+    final prefs = await SharedPreferences.getInstance();
+    final text = prefs.getString(_logoKey);
+    if (text == null || text.trim().isEmpty) {
+      return widgetLogoPink;
+    }
+    return text;
+  }
+
+  static Future<void> saveAppLogoVariant(String logo) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_appLogoKey, logo);
+    await _saveSharedStringForIOS(key: _appLogoKey, value: logo);
+    try {
+      await appIconPlatform.invokeMethod('set_app_icon', {
+        'variant': logo,
+      });
+    } catch (_) {}
+  }
+
+  static Future<String> loadAppLogoVariant() async {
+    final prefs = await SharedPreferences.getInstance();
+    final text = prefs.getString(_appLogoKey);
+    if (text == null || text.trim().isEmpty) {
+      return widgetLogoPink;
+    }
+    return text;
   }
 
   static String _configKey(String scope) {

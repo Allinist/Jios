@@ -77,6 +77,10 @@ import UserNotifications
         name: "widget_refresh",
         binaryMessenger: messenger
     )
+    let appIconChannel = FlutterMethodChannel(
+        name: "app_icon",
+        binaryMessenger: messenger
+    )
     let notificationChannel = FlutterMethodChannel(
         name: "task_notification",
         binaryMessenger: messenger
@@ -115,6 +119,44 @@ import UserNotifications
         result(FlutterMethodNotImplemented)
       }
 
+    }
+
+    appIconChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+      if call.method == "set_app_icon" {
+        guard let args = call.arguments as? [String: Any],
+              let variant = args["variant"] as? String else {
+          result(
+            FlutterError(
+              code: "invalid_arguments",
+              message: "Expected variant",
+              details: nil
+            )
+          )
+          return
+        }
+
+        guard UIApplication.shared.supportsAlternateIcons else {
+          result(nil)
+          return
+        }
+
+        let iconName: String? = variant == "BlueLogo" ? "BlueLogo" : nil
+        UIApplication.shared.setAlternateIconName(iconName) { error in
+          if let error {
+            result(
+              FlutterError(
+                code: "icon_change_failed",
+                message: error.localizedDescription,
+                details: nil
+              )
+            )
+          } else {
+            result(nil)
+          }
+        }
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
     }
 
     notificationChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
