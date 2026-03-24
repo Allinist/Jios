@@ -208,7 +208,23 @@ class WidgetService {
       }
     }
 
-    return units.isEmpty ? '0分钟' : units.join('');
+    if (units.isNotEmpty) {
+      return units.join('');
+    }
+
+    if (duration.inMinutes <= 0) {
+      return '0分钟';
+    }
+
+    for (final (key, value, label) in definitions.reversed) {
+      if (!granularity.contains(key)) {
+        continue;
+      }
+      final count = (duration.inMinutes / value).ceil();
+      return '$count$label';
+    }
+
+    return '0分钟';
   }
 
   static String _formatHoursMinutes(int minutes) {

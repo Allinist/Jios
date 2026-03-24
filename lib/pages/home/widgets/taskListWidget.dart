@@ -290,11 +290,23 @@ class _TaskListWidgetState extends State<TaskListWidget> {
       }
     }
 
-    if (units.isEmpty) {
+    if (units.isNotEmpty) {
+      return units.join('');
+    }
+
+    if (duration.inMinutes <= 0) {
       return '0分钟';
     }
 
-    return units.join('');
+    for (final (key, value, label) in definitions.reversed) {
+      if (!granularity.contains(key)) {
+        continue;
+      }
+      final count = (duration.inMinutes / value).ceil();
+      return '$count$label';
+    }
+
+    return '0分钟';
   }
 
   String _formatHoursMinutes(int minutes) {

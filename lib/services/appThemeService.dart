@@ -73,7 +73,7 @@ class AppThemeService {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: pinkOutline),
+            side: BorderSide(color: pinkOutline),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
@@ -81,11 +81,11 @@ class AppThemeService {
           fillColor: pinkSurface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: pinkOutline),
+            borderSide: BorderSide(color: pinkOutline),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: pinkOutline),
+            borderSide: BorderSide(color: pinkOutline),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -112,7 +112,7 @@ class AppThemeService {
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFFC14379),
-            side: const BorderSide(color: pinkOutline),
+            side: BorderSide(color: pinkOutline),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
