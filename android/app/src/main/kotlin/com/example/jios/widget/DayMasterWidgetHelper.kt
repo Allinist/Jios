@@ -31,6 +31,7 @@ data class WidgetConfig(
 object DayMasterWidgetHelper {
     private const val PREFS_NAME = "FlutterSharedPreferences"
     private const val TASKS_KEY = "flutter.widget_tasks"
+    private const val LOGO_KEY = "flutter.widget_logo_variant"
 
     private fun configKey(mode: WidgetMode): String {
         return when (mode) {
@@ -74,6 +75,14 @@ object DayMasterWidgetHelper {
             }
             WidgetMode.ALL -> tasks.filter { !isCompleted(it) }
             WidgetMode.TODAY, WidgetMode.CONFIGURED -> tasks.filter { it.isToday && !isCompleted(it) }
+        }
+    }
+
+    fun loadLogoVariant(context: Context): String {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return when (prefs.getString(LOGO_KEY, "PinkLogo")) {
+            "BlueLogo" -> "BlueLogo"
+            else -> "PinkLogo"
         }
     }
 

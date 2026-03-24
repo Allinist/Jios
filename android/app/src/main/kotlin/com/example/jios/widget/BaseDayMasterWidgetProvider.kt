@@ -43,6 +43,11 @@ abstract class BaseDayMasterWidgetProvider : AppWidgetProvider() {
         val tasks = DayMasterWidgetHelper.loadTasks(context, mode)
         val views = RemoteViews(context.packageName, R.layout.daymaster_widget)
         views.setTextViewText(R.id.widgetTitle, title)
+        val logoRes = when (DayMasterWidgetHelper.loadLogoVariant(context)) {
+            "BlueLogo" -> R.drawable.blue_logo
+            else -> R.drawable.pink_logo
+        }
+        views.setImageViewResource(R.id.widgetLogo, logoRes)
 
         val maxLines = lineCountBySize(appWidgetManager, appWidgetId)
         bindLines(views, tasks, maxLines)
